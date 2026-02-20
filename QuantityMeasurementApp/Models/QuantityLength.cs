@@ -36,7 +36,7 @@ namespace QuantityMeasurementApp.Models
             if (obj is not QuantityLength other)
                 return false;
 
-            return ConvertToFeet().Equals(other.ConvertToFeet());
+            return Math.Abs(ConvertToFeet() - other.ConvertToFeet()) < 0.0001;
         }
 
         public override int GetHashCode()

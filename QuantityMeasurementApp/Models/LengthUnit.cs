@@ -1,18 +1,19 @@
+using System;
+
 namespace QuantityMeasurementApp.Models
 {
-    /// <summary>
-    /// Supported length units with conversion factor relative to Feet (base unit).
-    /// </summary>
     public enum LengthUnit
     {
         Feet,
-        Inches
+        Inches,
+        Yards,
+        Centimeters
     }
 
     public static class LengthUnitExtensions
     {
         /// <summary>
-        /// Returns conversion factor relative to base unit (Feet).
+        /// Converts unit to base unit (Feet).
         /// </summary>
         public static double ToFeetFactor(this LengthUnit unit)
         {
@@ -20,6 +21,8 @@ namespace QuantityMeasurementApp.Models
             {
                 LengthUnit.Feet => 1.0,
                 LengthUnit.Inches => 1.0 / 12.0,
+                LengthUnit.Yards => 3.0,
+                LengthUnit.Centimeters => 0.393701 / 12.0,
                 _ => throw new ArgumentException("Unsupported length unit.")
             };
         }

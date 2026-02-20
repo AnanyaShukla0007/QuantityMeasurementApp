@@ -10,19 +10,17 @@ namespace QuantityMeasurementApp
         {
             var service = new QuantityMeasurementService();
 
-            bool result1 = service.ValidateLengthEquality(1.0, LengthUnit.Feet,
-                                                          12.0, LengthUnit.Inches);
+            Console.WriteLine(service.ValidateLengthEquality(1.0, LengthUnit.Yards,
+                                                            3.0, LengthUnit.Feet));
 
-            bool result2 = service.ValidateLengthEquality(1.0, LengthUnit.Inches,
-                                                          1.0, LengthUnit.Inches);
+            Console.WriteLine(service.ValidateLengthEquality(1.0, LengthUnit.Yards,
+                                                            36.0, LengthUnit.Inches));
 
-            Console.WriteLine("Input: Quantity(1.0, Feet) and Quantity(12.0, Inches)");
-            Console.WriteLine($"Output: Equal ({result1})");
+            Console.WriteLine(service.ValidateLengthEquality(1.0, LengthUnit.Centimeters,
+                                                            0.393701, LengthUnit.Inches));
 
-            Console.WriteLine();
-
-            Console.WriteLine("Input: Quantity(1.0, Inches) and Quantity(1.0, Inches)");
-            Console.WriteLine($"Output: Equal ({result2})");
+            Console.WriteLine(service.ValidateLengthEquality(2.0, LengthUnit.Yards,
+                                                            6.0, LengthUnit.Feet));
         }
     }
 }
