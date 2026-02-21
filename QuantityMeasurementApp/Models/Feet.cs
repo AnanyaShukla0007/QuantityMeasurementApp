@@ -1,16 +1,21 @@
+using System;
+
 namespace QuantityMeasurementApp.Models
 {
     /// <summary>
-    /// Represents a measurement in Feet.
+    /// Represents a measurement in feet.
     /// Immutable value object.
     /// </summary>
     public sealed class Feet
     {
-        public double TotalUnits { get; }
+        public double Value { get; }
 
-        public Feet(double totalUnits)
+        public Feet(double value)
         {
-            TotalUnits = totalUnits;
+            if (double.IsNaN(value) || double.IsInfinity(value))
+                throw new ArgumentException("Invalid numeric value.");
+
+            Value = value;
         }
 
         public override bool Equals(object? obj)
@@ -21,12 +26,12 @@ namespace QuantityMeasurementApp.Models
             if (obj is not Feet other)
                 return false;
 
-            return TotalUnits.Equals(other.TotalUnits);
+            return Value.Equals(other.Value);
         }
 
         public override int GetHashCode()
         {
-            return TotalUnits.GetHashCode();
+            return Value.GetHashCode();
         }
     }
 }
