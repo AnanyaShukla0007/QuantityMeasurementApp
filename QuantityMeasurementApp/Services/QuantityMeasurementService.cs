@@ -3,17 +3,32 @@ using QuantityMeasurementApp.Models;
 namespace QuantityMeasurementApp.Services
 {
     /// <summary>
-    /// Service layer for validating quantity equality.
+    /// Provides validation methods for comparing length quantities while preserving UC1–UC4 compatibility.
     /// </summary>
     public class QuantityMeasurementService
     {
+        // UC1 compatibility
+        public bool ValidateFeetEquality(double firstValue, double secondValue)
+        {
+            return ValidateLengthEquality(firstValue, LengthUnit.Feet,
+                                          secondValue, LengthUnit.Feet);
+        }
+
+        // UC2 compatibility
+        public bool ValidateInchesEquality(double firstValue, double secondValue)
+        {
+            return ValidateLengthEquality(firstValue, LengthUnit.Inches,
+                                          secondValue, LengthUnit.Inches);
+        }
+
+        // UC3 + UC4 generic comparison
         public bool ValidateLengthEquality(double firstValue, LengthUnit firstUnit,
                                            double secondValue, LengthUnit secondUnit)
         {
-            var firstQuantity = new QuantityLength(firstValue, firstUnit);
-            var secondQuantity = new QuantityLength(secondValue, secondUnit);
+            var first = new QuantityLength(firstValue, firstUnit);
+            var second = new QuantityLength(secondValue, secondUnit);
 
-            return firstQuantity.Equals(secondQuantity);
+            return first.Equals(second);
         }
     }
 }

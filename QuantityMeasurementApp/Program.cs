@@ -1,26 +1,19 @@
-using System;
-using QuantityMeasurementApp.Models;
-using QuantityMeasurementApp.Services;
+using QuantityMeasurementApp.Menu;
 
 namespace QuantityMeasurementApp
 {
+    /// <summary>
+    /// Application entry point that initializes and runs the console menu.
+    /// </summary>
     internal class Program
     {
         static void Main(string[] args)
         {
-            var service = new QuantityMeasurementService();
+            // Instantiate menu
+            var menu = new ConsoleMenu();
 
-            Console.WriteLine(service.ValidateLengthEquality(1.0, LengthUnit.Yards,
-                                                            3.0, LengthUnit.Feet));
-
-            Console.WriteLine(service.ValidateLengthEquality(1.0, LengthUnit.Yards,
-                                                            36.0, LengthUnit.Inches));
-
-            Console.WriteLine(service.ValidateLengthEquality(1.0, LengthUnit.Centimeters,
-                                                            0.393701, LengthUnit.Inches));
-
-            Console.WriteLine(service.ValidateLengthEquality(2.0, LengthUnit.Yards,
-                                                            6.0, LengthUnit.Feet));
+            // Run application
+            menu.Run();
         }
     }
 }
