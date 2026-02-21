@@ -1,60 +1,128 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using QuantityMeasurementApp.Models;
 using QuantityMeasurementApp.Services;
-using Xunit;
 
 namespace QuantityMeasurementApp.Tests
 {
+    /// <summary>
+    /// Contains unit tests validating Feet and Inches equality behavior for UC2.
+    /// </summary>
+    [TestClass]
     public class QuantityMeasurementServiceTests
     {
-        private readonly QuantityMeasurementService _service = new();
+        // Service instance used across tests
+        private QuantityMeasurementService _service;
 
-        [Fact]
-        public void testEquality_FeetToFeet_SameValue()
+        // Runs before each test method
+        [TestInitialize]
+        public void Setup()
         {
-            Assert.True(_service.ValidateLengthEquality(1.0, LengthUnit.Feet,
-                                                        1.0, LengthUnit.Feet));
+            // Initialize service
+            _service = new QuantityMeasurementService();
         }
 
-        [Fact]
-        public void testEquality_InchToInch_SameValue()
+        // -------- FEET TESTS --------
+
+        [TestMethod]
+        public void testFeetEquality_SameValue()
         {
-            Assert.True(_service.ValidateLengthEquality(1.0, LengthUnit.Inches,
-                                                        1.0, LengthUnit.Inches));
+            // Compare identical feet values
+            bool result = _service.ValidateFeetEquality(1.0, 1.0);
+
+            // Verify equality returns true
+            Assert.IsTrue(result);
         }
 
-        [Fact]
-        public void testEquality_FeetToInch_EquivalentValue()
+        [TestMethod]
+        public void testFeetEquality_DifferentValue()
         {
-            Assert.True(_service.ValidateLengthEquality(1.0, LengthUnit.Feet,
-                                                        12.0, LengthUnit.Inches));
+            // Compare different feet values
+            bool result = _service.ValidateFeetEquality(1.0, 2.0);
+
+            // Verify equality returns false
+            Assert.IsFalse(result);
         }
 
-        [Fact]
-        public void testEquality_InchToFeet_EquivalentValue()
+        [TestMethod]
+        public void testFeetEquality_NullComparison()
         {
-            Assert.True(_service.ValidateLengthEquality(12.0, LengthUnit.Inches,
-                                                        1.0, LengthUnit.Feet));
+            // Create feet instance
+            var feet = new Feet(1.0);
+
+            // Verify comparison with null returns false
+            Assert.IsFalse(feet.Equals(null));
         }
 
-        [Fact]
-        public void testEquality_DifferentValues()
+        [TestMethod]
+        public void testFeetEquality_NonNumericInput()
         {
-            Assert.False(_service.ValidateLengthEquality(1.0, LengthUnit.Feet,
-                                                         2.0, LengthUnit.Feet));
+            // Create feet instance
+            var feet = new Feet(1.0);
+
+            // Verify comparison with different type returns false
+            Assert.IsFalse(feet.Equals("invalid"));
         }
 
-        [Fact]
-        public void testEquality_NullComparison()
+        [TestMethod]
+        public void testFeetEquality_SameReference()
         {
-            var quantity = new QuantityLength(1.0, LengthUnit.Feet);
-            Assert.False(quantity.Equals(null));
+            // Create feet instance
+            var feet = new Feet(1.0);
+
+            // Verify reflexive property
+            Assert.IsTrue(feet.Equals(feet));
         }
 
-        [Fact]
-        public void testEquality_SameReference()
+        // -------- INCHES TESTS --------
+
+        [TestMethod]
+        public void testInchesEquality_SameValue()
         {
-            var quantity = new QuantityLength(1.0, LengthUnit.Feet);
-            Assert.True(quantity.Equals(quantity));
+            // Compare identical inches values
+            bool result = _service.ValidateInchesEquality(1.0, 1.0);
+
+            // Verify equality returns true
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void testInchesEquality_DifferentValue()
+        {
+            // Compare different inches values
+            bool result = _service.ValidateInchesEquality(1.0, 2.0);
+
+            // Verify equality returns false
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void testInchesEquality_NullComparison()
+        {
+            // Create inches instance
+            var inches = new Inches(1.0);
+
+            // Verify comparison with null returns false
+            Assert.IsFalse(inches.Equals(null));
+        }
+
+        [TestMethod]
+        public void testInchesEquality_NonNumericInput()
+        {
+            // Create inches instance
+            var inches = new Inches(1.0);
+
+            // Verify comparison with different type returns false
+            Assert.IsFalse(inches.Equals("invalid"));
+        }
+
+        [TestMethod]
+        public void testInchesEquality_SameReference()
+        {
+            // Create inches instance
+            var inches = new Inches(1.0);
+
+            // Verify reflexive property
+            Assert.IsTrue(inches.Equals(inches));
         }
     }
 }

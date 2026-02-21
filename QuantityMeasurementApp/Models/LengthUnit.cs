@@ -1,7 +1,9 @@
+using System;
+
 namespace QuantityMeasurementApp.Models
 {
     /// <summary>
-    /// Supported length units with conversion factor relative to Feet (base unit).
+    /// Defines supported length units and their conversion factors relative to Feet (base unit).
     /// </summary>
     public enum LengthUnit
     {
@@ -11,9 +13,7 @@ namespace QuantityMeasurementApp.Models
 
     public static class LengthUnitExtensions
     {
-        /// <summary>
-        /// Returns conversion factor relative to base unit (Feet).
-        /// </summary>
+        // Returns conversion factor relative to Feet
         public static double ToFeetFactor(this LengthUnit unit)
         {
             return unit switch
