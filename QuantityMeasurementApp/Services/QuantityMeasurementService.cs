@@ -3,30 +3,34 @@ using QuantityMeasurementApp.Models;
 namespace QuantityMeasurementApp.Services
 {
     /// <summary>
-    /// Provides equality validation for Feet and Inches.
+    /// Provides validation methods for comparing Feet and Inches measurements separately.
     /// </summary>
     public class QuantityMeasurementService
     {
-        /// <summary>
-        /// Validates equality between two Feet measurements.
-        /// </summary>
+        // Validates equality between two Feet values
         public bool ValidateFeetEquality(double firstValue, double secondValue)
         {
-            var firstMeasurement = new Feet(firstValue);
-            var secondMeasurement = new Feet(secondValue);
+            // Create first Feet object
+            var first = new Feet(firstValue);
 
-            return firstMeasurement.Equals(secondMeasurement);
+            // Create second Feet object
+            var second = new Feet(secondValue);
+
+            // Return equality comparison result
+            return first.Equals(second);
         }
 
-        /// <summary>
-        /// Validates equality between two Inches measurements.
-        /// </summary>
+        // Validates equality between two Inches values
         public bool ValidateInchesEquality(double firstValue, double secondValue)
         {
-            var firstMeasurement = new Inches(firstValue);
-            var secondMeasurement = new Inches(secondValue);
+            // Create first Inches object
+            var first = new Inches(firstValue);
 
-            return firstMeasurement.Equals(secondMeasurement);
+            // Create second Inches object
+            var second = new Inches(secondValue);
+
+            // Return equality comparison result
+            return first.Equals(second);
         }
     }
 }
