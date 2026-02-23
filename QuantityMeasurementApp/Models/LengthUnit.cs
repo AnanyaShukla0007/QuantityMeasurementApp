@@ -26,5 +26,11 @@ namespace QuantityMeasurementApp.Models
 
         public string GetUnitName()
             => _name;
+        public bool SupportsArithmetic() => true;
+
+        public void ValidateOperationSupport(string operation)
+        {
+            
+        }
     }
 }
