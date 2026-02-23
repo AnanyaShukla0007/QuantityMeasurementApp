@@ -23,7 +23,6 @@ namespace QuantityMeasurementApp.Menu
         {
             while (true)
             {
-                Console.Clear();
                 Console.WriteLine("=== MAIN MENU ===");
                 Console.WriteLine("1. Length Operations");
                 Console.WriteLine("2. Weight Operations");
@@ -51,7 +50,6 @@ namespace QuantityMeasurementApp.Menu
         {
             while (true)
             {
-                Console.Clear();
                 Console.WriteLine("=== LENGTH MENU ===");
                 Console.WriteLine("1. Equality");
                 Console.WriteLine("2. Conversion");
@@ -121,7 +119,7 @@ namespace QuantityMeasurementApp.Menu
         {
             while (true)
             {
-                Console.Clear();
+                
                 Console.WriteLine("=== WEIGHT MENU ===");
                 Console.WriteLine("1. Equality");
                 Console.WriteLine("2. Conversion");
@@ -191,7 +189,7 @@ namespace QuantityMeasurementApp.Menu
         {
             while (true)
             {
-                Console.Clear();
+                
                 Console.WriteLine("=== VOLUME MENU ===");
                 Console.WriteLine("1. Equality");
                 Console.WriteLine("2. Conversion");
@@ -261,7 +259,7 @@ namespace QuantityMeasurementApp.Menu
         {
             while (true)
             {
-                Console.Clear();
+               
                 Console.WriteLine("=== TEMPERATURE MENU ===");
                 Console.WriteLine("1. Equality");
                 Console.WriteLine("2. Conversion");
@@ -293,6 +291,7 @@ namespace QuantityMeasurementApp.Menu
         {
             double value = ReadValue("Enter value: ");
             TemperatureUnit from = ReadTemperatureUnit();
+
             TemperatureUnit to = ReadTemperatureUnit();
 
             var result = _temperatureService.Convert(value, from, to);

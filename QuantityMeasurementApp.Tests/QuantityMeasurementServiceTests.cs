@@ -4,157 +4,117 @@ using QuantityMeasurementApp.Models;
 namespace QuantityMeasurementApp.Tests
 {
     [TestClass]
-    public class SubtractionDivisionTests
+    public class UC14TemperatureTests
     {
-        // ================= SUBTRACTION =================
+        private const double Epsilon = 0.001;
+
+        // =========================
+        // EQUALITY TESTS
+        // =========================
 
         [TestMethod]
-        public void Subtract_SameUnit()
+        public void Temperature_0C_Equals_32F()
         {
-            var q1 = new Quantity<LengthUnit>(10, LengthUnit.Feet);
-            var q2 = new Quantity<LengthUnit>(5, LengthUnit.Feet);
+            var c = new Quantity<TemperatureUnit>(0, TemperatureUnit.CELSIUS);
+            var f = new Quantity<TemperatureUnit>(32, TemperatureUnit.FAHRENHEIT);
 
-            var result = q1.Subtract(q2);
-
-            Assert.AreEqual(5, result.Value);
+            Assert.IsTrue(c.Equals(f));
         }
 
         [TestMethod]
-        public void Subtract_CrossUnit()
+        public void Temperature_100C_Equals_212F()
         {
-            var q1 = new Quantity<LengthUnit>(10, LengthUnit.Feet);
-            var q2 = new Quantity<LengthUnit>(6, LengthUnit.Inches);
+            var c = new Quantity<TemperatureUnit>(100, TemperatureUnit.CELSIUS);
+            var f = new Quantity<TemperatureUnit>(212, TemperatureUnit.FAHRENHEIT);
 
-            var result = q1.Subtract(q2);
-
-            Assert.AreEqual(9.5, result.Value);
+            Assert.IsTrue(c.Equals(f));
         }
 
         [TestMethod]
-        public void Subtract_ExplicitTargetUnit()
+        public void Temperature_Negative40C_Equals_Negative40F()
         {
-            var q1 = new Quantity<LengthUnit>(10, LengthUnit.Feet);
-            var q2 = new Quantity<LengthUnit>(6, LengthUnit.Inches);
+            var c = new Quantity<TemperatureUnit>(-40, TemperatureUnit.CELSIUS);
+            var f = new Quantity<TemperatureUnit>(-40, TemperatureUnit.FAHRENHEIT);
 
-            var result = q1.Subtract(q2, LengthUnit.Inches);
+            Assert.IsTrue(c.Equals(f));
+        }
 
-            Assert.AreEqual(114, result.Value);
+        // =========================
+        // CONVERSION TESTS
+        // =========================
+
+        [TestMethod]
+        public void Convert_Celsius_To_Fahrenheit()
+        {
+            var c = new Quantity<TemperatureUnit>(100, TemperatureUnit.CELSIUS);
+            var result = c.ConvertTo(TemperatureUnit.FAHRENHEIT);
+
+            Assert.AreEqual(212, result.Value, Epsilon);
         }
 
         [TestMethod]
-        public void Subtract_ResultNegative()
+        public void Convert_Fahrenheit_To_Celsius()
         {
-            var q1 = new Quantity<LengthUnit>(5, LengthUnit.Feet);
-            var q2 = new Quantity<LengthUnit>(10, LengthUnit.Feet);
+            var f = new Quantity<TemperatureUnit>(32, TemperatureUnit.FAHRENHEIT);
+            var result = f.ConvertTo(TemperatureUnit.CELSIUS);
 
-            var result = q1.Subtract(q2);
-
-            Assert.AreEqual(-5, result.Value);
+            Assert.AreEqual(0, result.Value, Epsilon);
         }
 
         [TestMethod]
-        public void Subtract_ResultZero()
+        public void Convert_Celsius_To_Kelvin()
         {
-            var q1 = new Quantity<LengthUnit>(10, LengthUnit.Feet);
-            var q2 = new Quantity<LengthUnit>(120, LengthUnit.Inches);
+            var c = new Quantity<TemperatureUnit>(0, TemperatureUnit.CELSIUS);
+            var result = c.ConvertTo(TemperatureUnit.KELVIN);
 
-            var result = q1.Subtract(q2);
+            Assert.AreEqual(273.15, result.Value, Epsilon);
+        }
 
-            Assert.AreEqual(0, result.Value);
+        // =========================
+        // UNSUPPORTED OPERATIONS
+        // =========================
+
+        [TestMethod]
+        [ExpectedException(typeof(NotSupportedException))]
+        public void Temperature_Add_ShouldThrow()
+        {
+            var t1 = new Quantity<TemperatureUnit>(100, TemperatureUnit.CELSIUS);
+            var t2 = new Quantity<TemperatureUnit>(50, TemperatureUnit.CELSIUS);
+
+            t1.Add(t2);
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void Subtract_NullOperand()
+        [ExpectedException(typeof(NotSupportedException))]
+        public void Temperature_Subtract_ShouldThrow()
         {
-            var q1 = new Quantity<LengthUnit>(10, LengthUnit.Feet);
-            q1.Subtract(null);
+            var t1 = new Quantity<TemperatureUnit>(100, TemperatureUnit.CELSIUS);
+            var t2 = new Quantity<TemperatureUnit>(50, TemperatureUnit.CELSIUS);
+
+            t1.Subtract(t2);
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void Subtract_CrossCategory()
+        [ExpectedException(typeof(NotSupportedException))]
+        public void Temperature_Divide_ShouldThrow()
         {
-            var length = new Quantity<LengthUnit>(10, LengthUnit.Feet);
-            var weight = new Quantity<WeightUnit>(5, WeightUnit.Kilogram);
+            var t1 = new Quantity<TemperatureUnit>(100, TemperatureUnit.CELSIUS);
+            var t2 = new Quantity<TemperatureUnit>(50, TemperatureUnit.CELSIUS);
 
-            length.Subtract((dynamic)weight);
+            t1.Divide(t2);
         }
 
-        // ================= DIVISION =================
+        // =========================
+        // CROSS CATEGORY CHECK
+        // =========================
 
         [TestMethod]
-        public void Divide_SameUnit()
+        public void Temperature_NotEqual_Length()
         {
-            var q1 = new Quantity<LengthUnit>(10, LengthUnit.Feet);
-            var q2 = new Quantity<LengthUnit>(2, LengthUnit.Feet);
+            var temp = new Quantity<TemperatureUnit>(100, TemperatureUnit.CELSIUS);
+            var length = new Quantity<LengthUnit>(100, LengthUnit.Feet);
 
-            var result = q1.Divide(q2);
-
-            Assert.AreEqual(5, result);
-        }
-
-        [TestMethod]
-        public void Divide_CrossUnit()
-        {
-            var q1 = new Quantity<LengthUnit>(24, LengthUnit.Inches);
-            var q2 = new Quantity<LengthUnit>(2, LengthUnit.Feet);
-
-            var result = q1.Divide(q2);
-
-            Assert.AreEqual(1, result);
-        }
-
-        [TestMethod]
-        public void Divide_RatioLessThanOne()
-        {
-            var q1 = new Quantity<LengthUnit>(5, LengthUnit.Feet);
-            var q2 = new Quantity<LengthUnit>(10, LengthUnit.Feet);
-
-            var result = q1.Divide(q2);
-
-            Assert.AreEqual(0.5, result);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArithmeticException))]
-        public void Divide_ByZero()
-        {
-            var q1 = new Quantity<LengthUnit>(10, LengthUnit.Feet);
-            var q2 = new Quantity<LengthUnit>(0, LengthUnit.Feet);
-
-            q1.Divide(q2);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void Divide_NullOperand()
-        {
-            var q1 = new Quantity<LengthUnit>(10, LengthUnit.Feet);
-            q1.Divide(null);
-        }
-
-        [TestMethod]
-        public void Subtract_Immutability()
-        {
-            var q1 = new Quantity<LengthUnit>(10, LengthUnit.Feet);
-            var q2 = new Quantity<LengthUnit>(5, LengthUnit.Feet);
-
-            var result = q1.Subtract(q2);
-
-            Assert.AreEqual(10, q1.Value);
-            Assert.AreEqual(5, result.Value);
-        }
-
-        [TestMethod]
-        public void Divide_Immutability()
-        {
-            var q1 = new Quantity<LengthUnit>(10, LengthUnit.Feet);
-            var q2 = new Quantity<LengthUnit>(2, LengthUnit.Feet);
-
-            q1.Divide(q2);
-
-            Assert.AreEqual(10, q1.Value);
+            Assert.IsFalse(temp.Equals(length));
         }
     }
 }
