@@ -4,9 +4,9 @@ namespace QuantityMeasurementApp.Utilities
 {
     public static class RoundingHelper
     {
-        public static double RoundToTwoDecimals(double value)
+        public static double Round(double value)
         {
-            return Math.Round(value, 3); // matching UC7 tolerance
+            return Math.Round(value, 2, MidpointRounding.AwayFromZero);
         }
     }
 }

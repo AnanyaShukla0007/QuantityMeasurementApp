@@ -1,118 +1,62 @@
-using System;
-using QuantityMeasurementApp.Utilities;
+using QuantityMeasurementApp.Models;
 
 namespace QuantityMeasurementApp.Models
 {
-    /// <summary>
-    /// Immutable length value object.
-    /// Conversion responsibility delegated to LengthUnit.
-    /// </summary>
-    public sealed class QuantityLength
+    public class QuantityLength
     {
-        private const double Epsilon = 1e-6;
+        private readonly Quantity<LengthUnit> _internal;
 
-        public double Value { get; }
-        public LengthUnit Unit { get; }
+        public double Value => _internal.Value;
+        public LengthUnit Unit => _internal.Unit;
 
         public QuantityLength(double value, LengthUnit unit)
         {
-            if (!double.IsFinite(value))
-                throw new ArgumentException("Invalid numeric value.");
-
-            Unit = unit;
-            Value = value;
+            _internal = new Quantity<LengthUnit>(value, unit);
         }
 
-        private double ToBaseUnit()
+        public bool Equals(QuantityLength other)
         {
-            return Unit.ConvertToBaseUnit(Value);
+            return _internal.Equals(other._internal);
         }
 
-        // ---------------- CONVERSION ----------------
-
-        public QuantityLength ConvertTo(LengthUnit targetUnit)
+        public QuantityLength ConvertTo(LengthUnit target)
         {
-            double baseValue = ToBaseUnit();
-            double converted = targetUnit.ConvertFromBaseUnit(baseValue);
-
-            return new QuantityLength(
-                RoundingHelper.RoundToTwoDecimals(converted),
-                targetUnit);
+            var result = _internal.ConvertTo(target);
+            return new QuantityLength(result.Value, result.Unit);
         }
 
-        public static double Convert(double value,
-                                     LengthUnit from,
-                                     LengthUnit to)
+        public QuantityLength Add(QuantityLength other)
         {
-            if (!double.IsFinite(value))
-                throw new ArgumentException("Invalid numeric value.");
-
-            double baseValue = from.ConvertToBaseUnit(value);
-            double converted = to.ConvertFromBaseUnit(baseValue);
-
-            return RoundingHelper.RoundToTwoDecimals(converted);
+            var result = _internal.Add(other._internal);
+            return new QuantityLength(result.Value, result.Unit);
         }
 
-        // ---------------- ADDITION ----------------
-
-        private static QuantityLength AddInternal(
-            QuantityLength first,
-            QuantityLength second,
-            LengthUnit targetUnit)
+        public QuantityLength Add(QuantityLength other, LengthUnit target)
         {
-            double baseSum =
-                first.ToBaseUnit() +
-                second.ToBaseUnit();
-
-            double converted =
-                targetUnit.ConvertFromBaseUnit(baseSum);
-
-            return new QuantityLength(
-                RoundingHelper.RoundToTwoDecimals(converted),
-                targetUnit);
+            var result = _internal.Add(other._internal, target);
+            return new QuantityLength(result.Value, result.Unit);
         }
 
-        public static QuantityLength Add(
-            QuantityLength first,
-            QuantityLength second)
+        public QuantityLength Subtract(QuantityLength other)
         {
-            if (first is null || second is null)
-                throw new ArgumentException("Operands cannot be null.");
-
-            return AddInternal(first, second, first.Unit);
+            var result = _internal.Subtract(other._internal);
+            return new QuantityLength(result.Value, result.Unit);
         }
 
-        public static QuantityLength Add(
-            QuantityLength first,
-            QuantityLength second,
-            LengthUnit targetUnit)
+        public QuantityLength Subtract(QuantityLength other, LengthUnit target)
         {
-            if (first is null || second is null)
-                throw new ArgumentException("Operands cannot be null.");
-
-            return AddInternal(first, second, targetUnit);
+            var result = _internal.Subtract(other._internal, target);
+            return new QuantityLength(result.Value, result.Unit);
         }
 
-        // ---------------- EQUALITY ----------------
-
-        public override bool Equals(object obj)
+        public double Divide(QuantityLength other)
         {
-            if (obj is not QuantityLength other)
-                return false;
-
-            return Math.Abs(
-                this.ToBaseUnit() -
-                other.ToBaseUnit()) < Epsilon;
-        }
-
-        public override int GetHashCode()
-        {
-            return ToBaseUnit().GetHashCode();
+            return _internal.Divide(other._internal);
         }
 
         public override string ToString()
         {
-            return $"Quantity({Value}, {Unit})";
+            return _internal.ToString();
         }
     }
 }

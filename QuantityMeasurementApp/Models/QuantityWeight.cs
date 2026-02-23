@@ -1,117 +1,62 @@
-using System;
-using QuantityMeasurementApp.Utilities;
+using QuantityMeasurementApp.Models;
 
 namespace QuantityMeasurementApp.Models
 {
-    /// <summary>
-    /// Immutable weight value object.
-    /// </summary>
-    public sealed class QuantityWeight
+    public class QuantityWeight
     {
-        private const double Epsilon = 1e-6;
+        private readonly Quantity<WeightUnit> _internal;
 
-        public double Value { get; }
-        public WeightUnit Unit { get; }
+        public double Value => _internal.Value;
+        public WeightUnit Unit => _internal.Unit;
 
         public QuantityWeight(double value, WeightUnit unit)
         {
-            if (!double.IsFinite(value))
-                throw new ArgumentException("Invalid numeric value.");
-
-            Unit = unit;
-            Value = value;
+            _internal = new Quantity<WeightUnit>(value, unit);
         }
 
-        private double ToBaseUnit()
+        public bool Equals(QuantityWeight other)
         {
-            return Unit.ConvertToBaseUnit(Value);
+            return _internal.Equals(other._internal);
         }
 
-        // ---------------- CONVERSION ----------------
-
-        public QuantityWeight ConvertTo(WeightUnit targetUnit)
+        public QuantityWeight ConvertTo(WeightUnit target)
         {
-            double baseValue = ToBaseUnit();
-            double converted = targetUnit.ConvertFromBaseUnit(baseValue);
-
-            return new QuantityWeight(
-                RoundingHelper.RoundToTwoDecimals(converted),
-                targetUnit);
+            var result = _internal.ConvertTo(target);
+            return new QuantityWeight(result.Value, result.Unit);
         }
 
-        public static double Convert(double value,
-                                     WeightUnit from,
-                                     WeightUnit to)
+        public QuantityWeight Add(QuantityWeight other)
         {
-            if (!double.IsFinite(value))
-                throw new ArgumentException("Invalid numeric value.");
-
-            double baseValue = from.ConvertToBaseUnit(value);
-            double converted = to.ConvertFromBaseUnit(baseValue);
-
-            return RoundingHelper.RoundToTwoDecimals(converted);
+            var result = _internal.Add(other._internal);
+            return new QuantityWeight(result.Value, result.Unit);
         }
 
-        // ---------------- ADDITION ----------------
-
-        private static QuantityWeight AddInternal(
-            QuantityWeight first,
-            QuantityWeight second,
-            WeightUnit targetUnit)
+        public QuantityWeight Add(QuantityWeight other, WeightUnit target)
         {
-            double baseSum =
-                first.ToBaseUnit() +
-                second.ToBaseUnit();
-
-            double converted =
-                targetUnit.ConvertFromBaseUnit(baseSum);
-
-            return new QuantityWeight(
-                RoundingHelper.RoundToTwoDecimals(converted),
-                targetUnit);
+            var result = _internal.Add(other._internal, target);
+            return new QuantityWeight(result.Value, result.Unit);
         }
 
-        public static QuantityWeight Add(
-            QuantityWeight first,
-            QuantityWeight second)
+        public QuantityWeight Subtract(QuantityWeight other)
         {
-            if (first is null || second is null)
-                throw new ArgumentException("Operands cannot be null.");
-
-            return AddInternal(first, second, first.Unit);
+            var result = _internal.Subtract(other._internal);
+            return new QuantityWeight(result.Value, result.Unit);
         }
 
-        public static QuantityWeight Add(
-            QuantityWeight first,
-            QuantityWeight second,
-            WeightUnit targetUnit)
+        public QuantityWeight Subtract(QuantityWeight other, WeightUnit target)
         {
-            if (first is null || second is null)
-                throw new ArgumentException("Operands cannot be null.");
-
-            return AddInternal(first, second, targetUnit);
+            var result = _internal.Subtract(other._internal, target);
+            return new QuantityWeight(result.Value, result.Unit);
         }
 
-        // ---------------- EQUALITY ----------------
-
-        public override bool Equals(object obj)
+        public double Divide(QuantityWeight other)
         {
-            if (obj is not QuantityWeight other)
-                return false;
-
-            return Math.Abs(
-                this.ToBaseUnit() -
-                other.ToBaseUnit()) < Epsilon;
-        }
-
-        public override int GetHashCode()
-        {
-            return ToBaseUnit().GetHashCode();
+            return _internal.Divide(other._internal);
         }
 
         public override string ToString()
         {
-            return $"Quantity({Value}, {Unit})";
+            return _internal.ToString();
         }
     }
 }

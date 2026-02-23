@@ -1,16 +1,17 @@
 using System;
+using QuantityMeasurementApp.Interface;
+using QuantityMeasurementApp.Utilities;
 
 namespace QuantityMeasurementApp.Models
 {
-    public sealed class Quantity<TUnit>
-        where TUnit : struct, Enum
+    public sealed class Quantity<U> where U : struct, Enum
     {
         private const double Epsilon = 1e-6;
 
         public double Value { get; }
-        public TUnit Unit { get; }
+        public U Unit { get; }
 
-        public Quantity(double value, TUnit unit)
+        public Quantity(double value, U unit)
         {
             if (!double.IsFinite(value))
                 throw new ArgumentException("Invalid numeric value.");
@@ -19,49 +20,93 @@ namespace QuantityMeasurementApp.Models
             Unit = unit;
         }
 
-        private double ToBaseUnit()
+        private double ToBase()
         {
-            dynamic u = Unit;
-            return u.ConvertToBaseUnit(Value);
+            dynamic unit = Unit;
+            return unit.ConvertToBaseUnit(Value);
         }
 
-        public Quantity<TUnit> ConvertTo(TUnit target)
+        private double FromBase(double baseValue, U target)
         {
-            dynamic source = Unit;
-            dynamic targetUnit = target;
-
-            double baseValue = source.ConvertToBaseUnit(Value);
-            double converted = targetUnit.ConvertFromBaseUnit(baseValue);
-
-            return new Quantity<TUnit>(converted, target);
+            dynamic unit = target;
+            return unit.ConvertFromBaseUnit(baseValue);
         }
 
-        public Quantity<TUnit> Add(Quantity<TUnit> other)
+        private static void ValidateOperands(Quantity<U> first, Quantity<U> second)
         {
-            return Add(other, this.Unit);
+            if (first is null || second is null)
+                throw new ArgumentException("Operands cannot be null.");
         }
 
-        public Quantity<TUnit> Add(Quantity<TUnit> other, TUnit target)
+        public override bool Equals(object? obj)
         {
-            dynamic t = target;
-
-            double baseSum = this.ToBaseUnit() + other.ToBaseUnit();
-            double converted = t.ConvertFromBaseUnit(baseSum);
-
-            return new Quantity<TUnit>(converted, target);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj is not Quantity<TUnit> other)
+            if (obj is not Quantity<U> other)
                 return false;
 
-            return Math.Abs(this.ToBaseUnit() - other.ToBaseUnit()) < Epsilon;
+            return Math.Abs(ToBase() - other.ToBase()) < Epsilon;
         }
 
         public override int GetHashCode()
         {
-            return ToBaseUnit().GetHashCode();
+            return HashCode.Combine(Math.Round(ToBase(), 6));
+        }
+
+        public Quantity<U> ConvertTo(U targetUnit)
+        {
+            double converted = FromBase(ToBase(), targetUnit);
+            return new Quantity<U>(RoundingHelper.Round(converted), targetUnit);
+        }
+
+        public Quantity<U> Add(Quantity<U> other)
+        {
+            ValidateOperands(this, other);
+
+            double baseSum = ToBase() + other.ToBase();
+            double converted = FromBase(baseSum, Unit);
+
+            return new Quantity<U>(RoundingHelper.Round(converted), Unit);
+        }
+
+        public Quantity<U> Add(Quantity<U> other, U targetUnit)
+        {
+            ValidateOperands(this, other);
+
+            double baseSum = ToBase() + other.ToBase();
+            double converted = FromBase(baseSum, targetUnit);
+
+            return new Quantity<U>(RoundingHelper.Round(converted), targetUnit);
+        }
+
+        public Quantity<U> Subtract(Quantity<U> other)
+        {
+            ValidateOperands(this, other);
+
+            double baseDiff = ToBase() - other.ToBase();
+            double converted = FromBase(baseDiff, Unit);
+
+            return new Quantity<U>(RoundingHelper.Round(converted), Unit);
+        }
+
+        public Quantity<U> Subtract(Quantity<U> other, U targetUnit)
+        {
+            ValidateOperands(this, other);
+
+            double baseDiff = ToBase() - other.ToBase();
+            double converted = FromBase(baseDiff, targetUnit);
+
+            return new Quantity<U>(RoundingHelper.Round(converted), targetUnit);
+        }
+
+        public double Divide(Quantity<U> other)
+        {
+            ValidateOperands(this, other);
+
+            double divisor = other.ToBase();
+
+            if (Math.Abs(divisor) < Epsilon)
+                throw new ArithmeticException("Cannot divide by zero.");
+
+            return ToBase() / divisor;
         }
 
         public override string ToString()

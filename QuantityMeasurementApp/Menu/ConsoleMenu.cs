@@ -4,10 +4,6 @@ using QuantityMeasurementApp.Services;
 
 namespace QuantityMeasurementApp.Menu
 {
-    /// <summary>
-    /// Hierarchical console menu supporting UC1–UC11.
-    /// No removals. New categories appended.
-    /// </summary>
     public class ConsoleMenu
     {
         private readonly QuantityMeasurementService _lengthService;
@@ -26,40 +22,28 @@ namespace QuantityMeasurementApp.Menu
             while (true)
             {
                 Console.Clear();
-
                 Console.WriteLine("=== MAIN MENU ===");
-                Console.WriteLine("1. Length Operations (UC1–UC7)");
-                Console.WriteLine("2. Weight Operations (UC9)");
-                Console.WriteLine("3. Generic Quantity Operations (UC10)");
-                Console.WriteLine("4. Volume Operations (UC11)");
+                Console.WriteLine("1. Length Operations");
+                Console.WriteLine("2. Weight Operations");
+                Console.WriteLine("3. Volume Operations");
+                Console.WriteLine("4. Generic Demo");
                 Console.WriteLine("5. Exit");
 
-                string? choice = Console.ReadLine();
-
-                try
+                switch (Console.ReadLine())
                 {
-                    switch (choice)
-                    {
-                        case "1": ShowLengthMenu(); break;
-                        case "2": ShowWeightMenu(); break;
-                        case "3": ShowGenericMenu(); break;
-                        case "4": ShowVolumeMenu(); break;
-                        case "5": return;
-                        default:
-                            Console.WriteLine("Invalid choice.");
-                            Pause();
-                            break;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error: {ex.Message}");
-                    Pause();
+                    case "1": ShowLengthMenu(); break;
+                    case "2": ShowWeightMenu(); break;
+                    case "3": ShowVolumeMenu(); break;
+                    case "4": ShowGenericDemo(); break;
+                    case "5": return;
+                    default: Invalid(); break;
                 }
             }
         }
 
-        // ================= LENGTH =================
+        // ======================================================
+        // LENGTH MENU (UC1–UC7 + UC12)
+        // ======================================================
 
         private void ShowLengthMenu()
         {
@@ -69,23 +53,20 @@ namespace QuantityMeasurementApp.Menu
                 Console.WriteLine("=== LENGTH MENU ===");
                 Console.WriteLine("1. Equality");
                 Console.WriteLine("2. Conversion");
-                Console.WriteLine("3. Addition - Default Unit");
-                Console.WriteLine("4. Addition - Explicit Target Unit");
-                Console.WriteLine("5. Back");
+                Console.WriteLine("3. Addition");
+                Console.WriteLine("4. Subtraction");
+                Console.WriteLine("5. Division");
+                Console.WriteLine("6. Back");
 
-                var choice = Console.ReadLine();
-
-                switch (choice)
+                switch (Console.ReadLine())
                 {
                     case "1": HandleLengthEquality(); break;
                     case "2": HandleLengthConversion(); break;
-                    case "3": HandleLengthAdditionDefault(); break;
-                    case "4": HandleLengthAdditionExplicit(); break;
-                    case "5": return;
-                    default:
-                        Console.WriteLine("Invalid choice.");
-                        Pause();
-                        break;
+                    case "3": HandleLengthAddition(); break;
+                    case "4": HandleLengthSubtraction(); break;
+                    case "5": HandleLengthDivision(); break;
+                    case "6": return;
+                    default: Invalid(); break;
                 }
             }
         }
@@ -109,31 +90,43 @@ namespace QuantityMeasurementApp.Menu
             LengthUnit to = ReadLengthUnit();
 
             double result = _lengthService.Convert(value, from, to);
-            Console.WriteLine($"Converted Value: {result}");
+            Console.WriteLine($"Converted: {result}");
             Pause();
         }
 
-        private void HandleLengthAdditionDefault()
+        private void HandleLengthAddition()
         {
             var q1 = ReadLength();
             var q2 = ReadLength();
+
             var result = _lengthService.AddLength(q1, q2);
             Console.WriteLine($"Result: {result}");
             Pause();
         }
 
-        private void HandleLengthAdditionExplicit()
+        private void HandleLengthSubtraction()
         {
             var q1 = ReadLength();
             var q2 = ReadLength();
-            LengthUnit target = ReadLengthUnit();
 
-            var result = _lengthService.AddLength(q1, q2, target);
+            var result = q1.Subtract(q2);
             Console.WriteLine($"Result: {result}");
             Pause();
         }
 
-        // ================= WEIGHT =================
+        private void HandleLengthDivision()
+        {
+            var q1 = ReadLength();
+            var q2 = ReadLength();
+
+            double result = q1.Divide(q2);
+            Console.WriteLine($"Ratio: {result}");
+            Pause();
+        }
+
+        // ======================================================
+        // WEIGHT MENU (UC9 + UC12)
+        // ======================================================
 
         private void ShowWeightMenu()
         {
@@ -143,23 +136,20 @@ namespace QuantityMeasurementApp.Menu
                 Console.WriteLine("=== WEIGHT MENU ===");
                 Console.WriteLine("1. Equality");
                 Console.WriteLine("2. Conversion");
-                Console.WriteLine("3. Addition - Default Unit");
-                Console.WriteLine("4. Addition - Explicit Target Unit");
-                Console.WriteLine("5. Back");
+                Console.WriteLine("3. Addition");
+                Console.WriteLine("4. Subtraction");
+                Console.WriteLine("5. Division");
+                Console.WriteLine("6. Back");
 
-                var choice = Console.ReadLine();
-
-                switch (choice)
+                switch (Console.ReadLine())
                 {
                     case "1": HandleWeightEquality(); break;
                     case "2": HandleWeightConversion(); break;
-                    case "3": HandleWeightAdditionDefault(); break;
-                    case "4": HandleWeightAdditionExplicit(); break;
-                    case "5": return;
-                    default:
-                        Console.WriteLine("Invalid choice.");
-                        Pause();
-                        break;
+                    case "3": HandleWeightAddition(); break;
+                    case "4": HandleWeightSubtraction(); break;
+                    case "5": HandleWeightDivision(); break;
+                    case "6": return;
+                    default: Invalid(); break;
                 }
             }
         }
@@ -183,90 +173,66 @@ namespace QuantityMeasurementApp.Menu
             WeightUnit to = ReadWeightUnit();
 
             double result = _weightService.Convert(value, from, to);
-            Console.WriteLine($"Converted Value: {result}");
+            Console.WriteLine($"Converted: {result}");
             Pause();
         }
 
-        private void HandleWeightAdditionDefault()
+        private void HandleWeightAddition()
         {
             var q1 = ReadWeight();
             var q2 = ReadWeight();
+
             var result = _weightService.AddWeight(q1, q2);
             Console.WriteLine($"Result: {result}");
             Pause();
         }
 
-        private void HandleWeightAdditionExplicit()
+        private void HandleWeightSubtraction()
         {
             var q1 = ReadWeight();
             var q2 = ReadWeight();
-            WeightUnit target = ReadWeightUnit();
 
-            var result = _weightService.AddWeight(q1, q2, target);
+            var result = q1.Subtract(q2);
             Console.WriteLine($"Result: {result}");
             Pause();
         }
 
-        // ================= GENERIC =================
-
-        private void ShowGenericMenu()
+        private void HandleWeightDivision()
         {
-            while (true)
-            {
-                Console.Clear();
-                Console.WriteLine("=== GENERIC MENU (UC10) ===");
-                Console.WriteLine("1. Length Example");
-                Console.WriteLine("2. Weight Example");
-                Console.WriteLine("3. Back");
+            var q1 = ReadWeight();
+            var q2 = ReadWeight();
 
-                var choice = Console.ReadLine();
-
-                switch (choice)
-                {
-                    case "1":
-                        var l1 = new Quantity<LengthUnit>(1, LengthUnit.Feet);
-                        var l2 = new Quantity<LengthUnit>(12, LengthUnit.Inches);
-                        Console.WriteLine(_genericService.Add(l1, l2));
-                        Pause();
-                        break;
-
-                    case "2":
-                        var w1 = new Quantity<WeightUnit>(1, WeightUnit.Kilogram);
-                        var w2 = new Quantity<WeightUnit>(1000, WeightUnit.Gram);
-                        Console.WriteLine(_genericService.Add(w1, w2));
-                        Pause();
-                        break;
-
-                    case "3": return;
-                }
-            }
+            double result = q1.Divide(q2);
+            Console.WriteLine($"Ratio: {result}");
+            Pause();
         }
 
-        // ================= VOLUME =================
+        // ======================================================
+        // VOLUME MENU (UC11 + UC12)
+        // ======================================================
 
         private void ShowVolumeMenu()
         {
             while (true)
             {
                 Console.Clear();
-                Console.WriteLine("=== VOLUME MENU (UC11) ===");
+                Console.WriteLine("=== VOLUME MENU ===");
                 Console.WriteLine("1. Equality");
                 Console.WriteLine("2. Conversion");
                 Console.WriteLine("3. Addition");
-                Console.WriteLine("4. Back");
+                Console.WriteLine("4. Subtraction");
+                Console.WriteLine("5. Division");
+                Console.WriteLine("6. Back");
 
-                var choice = Console.ReadLine();
-
-                switch (choice)
+                switch (Console.ReadLine())
                 {
                     case "1": HandleVolumeEquality(); break;
                     case "2": HandleVolumeConversion(); break;
                     case "3": HandleVolumeAddition(); break;
-                    case "4": return;
-                    default:
-                        Console.WriteLine("Invalid choice.");
-                        Pause();
-                        break;
+                    case "4": HandleVolumeSubtraction(); break;
+                    case "5": HandleVolumeDivision(); break;
+                    case "6": return;
+                    default: Invalid(); break;
                 }
             }
         }
@@ -296,15 +262,73 @@ namespace QuantityMeasurementApp.Menu
 
         private void HandleVolumeAddition()
         {
-            var q1 = new Quantity<VolumeUnit>(ReadValue("Enter first value: "), ReadVolumeUnit());
-            var q2 = new Quantity<VolumeUnit>(ReadValue("Enter second value: "), ReadVolumeUnit());
+            var q1 = new Quantity<VolumeUnit>(
+                ReadValue("Enter first value: "),
+                ReadVolumeUnit());
+
+            var q2 = new Quantity<VolumeUnit>(
+                ReadValue("Enter second value: "),
+                ReadVolumeUnit());
 
             var result = _genericService.Add(q1, q2);
             Console.WriteLine($"Result: {result}");
             Pause();
         }
 
-        // ================= HELPERS =================
+        private void HandleVolumeSubtraction()
+        {
+            var q1 = new Quantity<VolumeUnit>(
+                ReadValue("Enter first value: "),
+                ReadVolumeUnit());
+
+            var q2 = new Quantity<VolumeUnit>(
+                ReadValue("Enter second value: "),
+                ReadVolumeUnit());
+
+            var result = _genericService.Subtract(q1, q2);
+            Console.WriteLine($"Result: {result}");
+            Pause();
+        }
+
+        private void HandleVolumeDivision()
+        {
+            var q1 = new Quantity<VolumeUnit>(
+                ReadValue("Enter first value: "),
+                ReadVolumeUnit());
+
+            var q2 = new Quantity<VolumeUnit>(
+                ReadValue("Enter second value: "),
+                ReadVolumeUnit());
+
+            double result = _genericService.Divide(q1, q2);
+            Console.WriteLine($"Ratio: {result}");
+            Pause();
+        }
+
+        // ======================================================
+        // GENERIC DEMO (UC10)
+        // ======================================================
+
+        private void ShowGenericDemo()
+        {
+            Console.Clear();
+            var l1 = new Quantity<LengthUnit>(1, LengthUnit.Feet);
+            var l2 = new Quantity<LengthUnit>(12, LengthUnit.Inches);
+
+            Console.WriteLine("Generic Add Example:");
+            Console.WriteLine(l1.Add(l2));
+            Pause();
+        }
+
+        // ======================================================
+        // HELPERS
+        // ======================================================
+
+        private QuantityLength ReadLength() =>
+            new QuantityLength(ReadValue("Enter value: "), ReadLengthUnit());
+
+        private QuantityWeight ReadWeight() =>
+            new QuantityWeight(ReadValue("Enter value: "), ReadWeightUnit());
 
         private double ReadValue(string message)
         {
@@ -313,12 +337,6 @@ namespace QuantityMeasurementApp.Menu
                 throw new ArgumentException("Invalid numeric value.");
             return value;
         }
-
-        private QuantityLength ReadLength() =>
-            new QuantityLength(ReadValue("Enter value: "), ReadLengthUnit());
-
-        private QuantityWeight ReadWeight() =>
-            new QuantityWeight(ReadValue("Enter value: "), ReadWeightUnit());
 
         private LengthUnit ReadLengthUnit()
         {
@@ -333,7 +351,7 @@ namespace QuantityMeasurementApp.Menu
                 "2" => LengthUnit.Inches,
                 "3" => LengthUnit.Yards,
                 "4" => LengthUnit.Centimeters,
-                _ => throw new ArgumentException("Invalid unit selection.")
+                _ => throw new ArgumentException("Invalid unit")
             };
         }
 
@@ -348,23 +366,29 @@ namespace QuantityMeasurementApp.Menu
                 "1" => WeightUnit.Kilogram,
                 "2" => WeightUnit.Gram,
                 "3" => WeightUnit.Pound,
-                _ => throw new ArgumentException("Invalid weight unit selection.")
+                _ => throw new ArgumentException("Invalid unit")
             };
         }
 
         private VolumeUnit ReadVolumeUnit()
         {
-            Console.WriteLine("1. Liter");
-            Console.WriteLine("2. Milliliter");
+            Console.WriteLine("1. Litre");
+            Console.WriteLine("2. Millilitre");
             Console.WriteLine("3. Gallon");
 
             return Console.ReadLine() switch
             {
-                "1" => VolumeUnit.Liter,
-                "2" => VolumeUnit.Milliliter,
-                "3" => VolumeUnit.Gallon,
-                _ => throw new ArgumentException("Invalid volume unit selection.")
+                "1" => VolumeUnit.LITRE,
+                "2" => VolumeUnit.MILLILITRE,
+                "3" => VolumeUnit.GALLON,
+                _ => throw new ArgumentException("Invalid unit")
             };
+        }
+
+        private void Invalid()
+        {
+            Console.WriteLine("Invalid choice.");
+            Pause();
         }
 
         private void Pause()
