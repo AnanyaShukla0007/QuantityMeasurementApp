@@ -1,36 +1,30 @@
-using System;
+using QuantityMeasurementApp.Interface;
 
 namespace QuantityMeasurementApp.Models
 {
-    public enum LengthUnit : byte
+    public sealed class LengthUnit : IMeasurable
     {
-        Feet,
-        Inches,
-        Yards,
-        Centimeters
-    }
+        private readonly double _toBaseFactor;
+        private readonly string _name;
 
-    public static class LengthUnitExtensions
-    {
-        public static double ConversionFactor(this LengthUnit unit)
+        private LengthUnit(double toBaseFactor, string name)
         {
-            return unit switch
-            {
-                LengthUnit.Feet => 1.0,
-                LengthUnit.Inches => 1.0 / 12.0,
-                LengthUnit.Yards => 3.0,
-                LengthUnit.Centimeters => 0.0328084,
-                _ => throw new ArgumentException("Unsupported unit.")
-            };
+            _toBaseFactor = toBaseFactor;
+            _name = name;
         }
 
-        public static double ConvertToBaseUnit(this LengthUnit unit, double value)
-            => value * unit.ConversionFactor();
+        public static readonly LengthUnit Feet = new LengthUnit(12.0, "Feet");
+        public static readonly LengthUnit Inches = new LengthUnit(1.0, "Inches");
+        public static readonly LengthUnit Yards = new LengthUnit(36.0, "Yards");
+        public static readonly LengthUnit Centimeters = new LengthUnit(1 / 2.54, "Centimeters");
 
-        public static double ConvertFromBaseUnit(this LengthUnit unit, double baseValue)
-            => baseValue / unit.ConversionFactor();
+        public double ConvertToBaseUnit(double value)
+            => value * _toBaseFactor;
 
-        public static string UnitName(this LengthUnit unit)
-            => unit.ToString();
+        public double ConvertFromBaseUnit(double baseValue)
+            => baseValue / _toBaseFactor;
+
+        public string GetUnitName()
+            => _name;
     }
 }

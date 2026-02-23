@@ -1,34 +1,29 @@
-using System;
+using QuantityMeasurementApp.Interface;
 
 namespace QuantityMeasurementApp.Models
 {
-    public enum WeightUnit : byte
+    public sealed class WeightUnit : IMeasurable
     {
-        Kilogram,
-        Gram,
-        Pound
-    }
+        private readonly double _toBaseFactor;
+        private readonly string _name;
 
-    public static class WeightUnitExtensions
-    {
-        public static double ConversionFactor(this WeightUnit unit)
+        private WeightUnit(double toBaseFactor, string name)
         {
-            return unit switch
-            {
-                WeightUnit.Kilogram => 1.0,
-                WeightUnit.Gram => 0.001,
-                WeightUnit.Pound => 0.453592,
-                _ => throw new ArgumentException("Unsupported unit.")
-            };
+            _toBaseFactor = toBaseFactor;
+            _name = name;
         }
 
-        public static double ConvertToBaseUnit(this WeightUnit unit, double value)
-            => value * unit.ConversionFactor();
+        public static readonly WeightUnit Gram = new WeightUnit(1.0, "Gram");
+        public static readonly WeightUnit Kilogram = new WeightUnit(1000.0, "Kilogram");
+        public static readonly WeightUnit Pound = new WeightUnit(453.592, "Pound");
 
-        public static double ConvertFromBaseUnit(this WeightUnit unit, double baseValue)
-            => baseValue / unit.ConversionFactor();
+        public double ConvertToBaseUnit(double value)
+            => value * _toBaseFactor;
 
-        public static string UnitName(this WeightUnit unit)
-            => unit.ToString();
+        public double ConvertFromBaseUnit(double baseValue)
+            => baseValue / _toBaseFactor;
+
+        public string GetUnitName()
+            => _name;
     }
 }

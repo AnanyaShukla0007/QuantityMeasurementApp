@@ -1,10 +1,11 @@
 using System;
+using System.Linq.Expressions;
 using QuantityMeasurementApp.Interface;
 using QuantityMeasurementApp.Utilities;
 
 namespace QuantityMeasurementApp.Models
 {
-    public sealed class Quantity<U> where U : struct, Enum
+    public sealed class Quantity<U> where U : IMeasurable
     {
         private const double Epsilon = 1e-6;
 
@@ -16,102 +17,196 @@ namespace QuantityMeasurementApp.Models
             if (!double.IsFinite(value))
                 throw new ArgumentException("Invalid numeric value.");
 
+            Unit = unit ?? throw new ArgumentException("Unit cannot be null.");
             Value = value;
-            Unit = unit;
         }
 
-        private double ToBase()
+        // ======================================================
+        // ENUM-BASED OPERATION DISPATCH (UC13)
+        // ======================================================
+
+        private enum ArithmeticOperation
         {
-            dynamic unit = Unit;
-            return unit.ConvertToBaseUnit(Value);
+            ADD,
+            SUBTRACT,
+            DIVIDE
         }
 
-        private double FromBase(double baseValue, U target)
+        // ======================================================
+        // CENTRALIZED VALIDATION (DRY)
+        // ======================================================
+
+        private void ValidateArithmeticOperands(
+            Quantity<U> other,
+            U targetUnit,
+            bool targetRequired)
         {
-            dynamic unit = target;
-            return unit.ConvertFromBaseUnit(baseValue);
+            if (other is null)
+                throw new ArgumentException("Operand cannot be null.");
+
+            if (Unit.GetType() != other.Unit.GetType())
+                throw new ArgumentException("Cross-category operation not allowed.");
+
+            if (!double.IsFinite(other.Value))
+                throw new ArgumentException("Invalid numeric value.");
+
+            if (targetRequired && targetUnit == null)
+                throw new ArgumentException("Target unit cannot be null.");
         }
 
-        private static void ValidateOperands(Quantity<U> first, Quantity<U> second)
+        // ======================================================
+        // CENTRALIZED BASE ARITHMETIC
+        // ======================================================
+
+        private double PerformBaseArithmetic(
+            Quantity<U> other,
+            ArithmeticOperation operation)
         {
-            if (first is null || second is null)
-                throw new ArgumentException("Operands cannot be null.");
+            double leftBase = ((dynamic)Unit).ConvertToBaseUnit(Value);
+            double rightBase = other.Unit.ConvertToBaseUnit(other.Value);
+
+            return operation switch
+            {
+                ArithmeticOperation.ADD => leftBase + rightBase,
+                ArithmeticOperation.SUBTRACT => leftBase - rightBase,
+                ArithmeticOperation.DIVIDE => Math.Abs(rightBase) < Epsilon
+                        ? throw new ArithmeticException("Cannot divide by zero.")
+                        : leftBase / rightBase,
+                _ => throw new InvalidOperationException("Unsupported operation.")
+            };
         }
 
-        public override bool Equals(object? obj)
+        // ======================================================
+        // EQUALITY
+        // ======================================================
+
+        public override bool Equals(object obj)
         {
             if (obj is not Quantity<U> other)
                 return false;
 
-            return Math.Abs(ToBase() - other.ToBase()) < Epsilon;
+            if (Unit.GetType() != other.Unit.GetType())
+                return false;
+
+            double left = ((dynamic)Unit).ConvertToBaseUnit(Value);
+            double right = other.Unit.ConvertToBaseUnit(other.Value);
+
+            return Math.Abs(left - right) < Epsilon;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Math.Round(ToBase(), 6));
+            return ((dynamic)Unit).ConvertToBaseUnit(Value).GetHashCode();
         }
+
+        // ======================================================
+        // CONVERSION
+        // ======================================================
 
         public Quantity<U> ConvertTo(U targetUnit)
         {
-            double converted = FromBase(ToBase(), targetUnit);
-            return new Quantity<U>(RoundingHelper.Round(converted), targetUnit);
+            if (targetUnit == null)
+                throw new ArgumentException("Target unit cannot be null.");
+
+            double baseValue = ((dynamic)Unit).ConvertToBaseUnit(Value);
+            double converted = targetUnit.ConvertFromBaseUnit(baseValue);
+
+            return new Quantity<U>(
+                RoundingHelper.Round(converted),
+                targetUnit);
         }
+
+        // ======================================================
+        // ADD (Implicit Target)
+        // ======================================================
 
         public Quantity<U> Add(Quantity<U> other)
         {
-            ValidateOperands(this, other);
+            ValidateArithmeticOperands(other, default, false);
 
-            double baseSum = ToBase() + other.ToBase();
-            double converted = FromBase(baseSum, Unit);
+            double baseResult = PerformBaseArithmetic(
+                other, ArithmeticOperation.ADD);
 
-            return new Quantity<U>(RoundingHelper.Round(converted), Unit);
+            double converted =
+                Unit.ConvertFromBaseUnit(baseResult);
+
+            return new Quantity<U>(
+                RoundingHelper.Round(converted),
+                Unit);
         }
+
+        // ======================================================
+        // ADD (Explicit Target)
+        // ======================================================
 
         public Quantity<U> Add(Quantity<U> other, U targetUnit)
         {
-            ValidateOperands(this, other);
+            ValidateArithmeticOperands(other, targetUnit, true);
 
-            double baseSum = ToBase() + other.ToBase();
-            double converted = FromBase(baseSum, targetUnit);
+            double baseResult = PerformBaseArithmetic(
+                other, ArithmeticOperation.ADD);
 
-            return new Quantity<U>(RoundingHelper.Round(converted), targetUnit);
+            double converted =
+                targetUnit.ConvertFromBaseUnit(baseResult);
+
+            return new Quantity<U>(
+                RoundingHelper.Round(converted),
+                targetUnit);
         }
+
+        // ======================================================
+        // SUBTRACT (Implicit)
+        // ======================================================
 
         public Quantity<U> Subtract(Quantity<U> other)
         {
-            ValidateOperands(this, other);
+            ValidateArithmeticOperands(other, default, false);
 
-            double baseDiff = ToBase() - other.ToBase();
-            double converted = FromBase(baseDiff, Unit);
+            double baseResult = PerformBaseArithmetic(
+                other, ArithmeticOperation.SUBTRACT);
 
-            return new Quantity<U>(RoundingHelper.Round(converted), Unit);
+            double converted =
+                Unit.ConvertFromBaseUnit(baseResult);
+
+            return new Quantity<U>(
+                RoundingHelper.Round(converted),
+                Unit);
         }
+
+        // ======================================================
+        // SUBTRACT (Explicit)
+        // ======================================================
 
         public Quantity<U> Subtract(Quantity<U> other, U targetUnit)
         {
-            ValidateOperands(this, other);
+            ValidateArithmeticOperands(other, targetUnit, true);
 
-            double baseDiff = ToBase() - other.ToBase();
-            double converted = FromBase(baseDiff, targetUnit);
+            double baseResult = PerformBaseArithmetic(
+                other, ArithmeticOperation.SUBTRACT);
 
-            return new Quantity<U>(RoundingHelper.Round(converted), targetUnit);
+            double converted =
+                targetUnit.ConvertFromBaseUnit(baseResult);
+
+            return new Quantity<U>(
+                RoundingHelper.Round(converted),
+                targetUnit);
         }
+
+        // ======================================================
+        // DIVIDE (Dimensionless)
+        // ======================================================
 
         public double Divide(Quantity<U> other)
         {
-            ValidateOperands(this, other);
+            ValidateArithmeticOperands(other, default, false);
 
-            double divisor = other.ToBase();
-
-            if (Math.Abs(divisor) < Epsilon)
-                throw new ArithmeticException("Cannot divide by zero.");
-
-            return ToBase() / divisor;
+            return PerformBaseArithmetic(
+                other, ArithmeticOperation.DIVIDE);
         }
 
         public override string ToString()
         {
-            return $"Quantity({Value}, {Unit})";
+            return $"Quantity({Value}, {Unit.GetUnitName()})";
         }
     }
 }

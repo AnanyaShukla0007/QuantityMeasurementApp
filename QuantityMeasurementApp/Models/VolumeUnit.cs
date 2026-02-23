@@ -2,40 +2,28 @@ using QuantityMeasurementApp.Interface;
 
 namespace QuantityMeasurementApp.Models
 {
-    public enum VolumeUnit
+    public sealed class VolumeUnit : IMeasurable
     {
-        LITRE,
-        MILLILITRE,
-        GALLON
-    }
+        private readonly double _toBaseFactor;
+        private readonly string _name;
 
-    public static class VolumeUnitExtensions
-    {
-        public static double ConvertToBaseUnit(this VolumeUnit unit, double value)
+        private VolumeUnit(double toBaseFactor, string name)
         {
-            return unit switch
-            {
-                VolumeUnit.LITRE => value,
-                VolumeUnit.MILLILITRE => value * 0.001,
-                VolumeUnit.GALLON => value * 3.78541,
-                _ => throw new ArgumentException("Invalid Volume Unit")
-            };
+            _toBaseFactor = toBaseFactor;
+            _name = name;
         }
 
-        public static double ConvertFromBaseUnit(this VolumeUnit unit, double baseValue)
-        {
-            return unit switch
-            {
-                VolumeUnit.LITRE => baseValue,
-                VolumeUnit.MILLILITRE => baseValue / 0.001,
-                VolumeUnit.GALLON => baseValue / 3.78541,
-                _ => throw new ArgumentException("Invalid Volume Unit")
-            };
-        }
+        public static readonly VolumeUnit MILLILITRE = new VolumeUnit(1.0, "Millilitre");
+        public static readonly VolumeUnit LITRE = new VolumeUnit(1000.0, "Litre");
+        public static readonly VolumeUnit GALLON = new VolumeUnit(3785.41, "Gallon");
 
-        public static string GetUnitName(this VolumeUnit unit)
-        {
-            return unit.ToString();
-        }
+        public double ConvertToBaseUnit(double value)
+            => value * _toBaseFactor;
+
+        public double ConvertFromBaseUnit(double baseValue)
+            => baseValue / _toBaseFactor;
+
+        public string GetUnitName()
+            => _name;
     }
 }
