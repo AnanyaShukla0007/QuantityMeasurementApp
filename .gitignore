@@ -1,7 +1,0 @@
-@"
-bin/
-obj/
-.vscode/
-*.user
-*.suo
-"@ | Out-File .gitignore -Encoding utf8
