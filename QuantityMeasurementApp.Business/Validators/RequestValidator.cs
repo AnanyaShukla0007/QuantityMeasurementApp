@@ -5,47 +5,36 @@ namespace QuantityMeasurementApp.Business.Validators
 {
     public static class RequestValidator
     {
-        public static void Validate(ConvertRequestDto dto)
+        public static void ValidateQuantity(QuantityDTO quantity)
         {
-            if (dto == null)
-                throw new ArgumentException("Request cannot be null.");
+            if (quantity == null)
+                throw new ArgumentException("Quantity cannot be null.");
 
-            if (string.IsNullOrWhiteSpace(dto.FromUnit))
-                throw new ArgumentException("FromUnit is required.");
+            if (string.IsNullOrWhiteSpace(quantity.Unit))
+                throw new ArgumentException("Unit is required.");
 
-            if (string.IsNullOrWhiteSpace(dto.ToUnit))
-                throw new ArgumentException("ToUnit is required.");
-
-            if (!double.IsFinite(dto.Value))
+            if (double.IsNaN(quantity.Value) || double.IsInfinity(quantity.Value))
                 throw new ArgumentException("Invalid numeric value.");
         }
 
-        public static void Validate(EqualityRequestDto dto)
+        public static void ValidateBinary(BinaryQuantityRequest request)
         {
-            if (dto == null)
+            if (request == null)
                 throw new ArgumentException("Request cannot be null.");
 
-            if (string.IsNullOrWhiteSpace(dto.Unit1) ||
-                string.IsNullOrWhiteSpace(dto.Unit2))
-                throw new ArgumentException("Units are required.");
-
-            if (!double.IsFinite(dto.Value1) ||
-                !double.IsFinite(dto.Value2))
-                throw new ArgumentException("Invalid numeric values.");
+            ValidateQuantity(request.Quantity1);
+            ValidateQuantity(request.Quantity2);
         }
 
-        public static void Validate(ArithmeticRequestDto dto)
+        public static void ValidateConversion(ConversionRequest request)
         {
-            if (dto == null)
+            if (request == null)
                 throw new ArgumentException("Request cannot be null.");
 
-            if (string.IsNullOrWhiteSpace(dto.Unit1) ||
-                string.IsNullOrWhiteSpace(dto.Unit2))
-                throw new ArgumentException("Units are required.");
+            ValidateQuantity(request.Source);
 
-            if (!double.IsFinite(dto.Value1) ||
-                !double.IsFinite(dto.Value2))
-                throw new ArgumentException("Invalid numeric values.");
+            if (string.IsNullOrWhiteSpace(request.TargetUnit))
+                throw new ArgumentException("Target unit is required.");
         }
     }
 }

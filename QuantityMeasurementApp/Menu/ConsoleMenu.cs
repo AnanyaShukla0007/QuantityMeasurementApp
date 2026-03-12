@@ -360,7 +360,7 @@ namespace QuantityMeasurementApp.Menu
         private Quantity<VolumeUnit> ReadVolume()
             => new Quantity<VolumeUnit>(ReadValue("Enter value: "), ReadVolumeUnit());
 
-        private double ReadValue(string message)
+        private double   ReadValue(string message)
         {
             Console.Write(message);
             if (!double.TryParse(Console.ReadLine(), out double value))
