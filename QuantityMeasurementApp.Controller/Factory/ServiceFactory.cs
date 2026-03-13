@@ -14,7 +14,7 @@ namespace QuantityMeasurementApp.Controller.Factory
 
         public ServiceFactory()
         {
-            _repository = QuantityMeasurementCacheRepository.GetInstance();
+            _repository = new QuantityMeasurementDatabaseRepository();  // FIX
 
             _service = new QuantityMeasurementServiceImpl(_repository);
 
@@ -25,15 +25,5 @@ namespace QuantityMeasurementApp.Controller.Factory
         {
             return _controller;
         }
-        public IQuantityMeasurementRepository GetRepository()
-        {
-            return new QuantityMeasurementDatabaseRepository();
-        }
-
-        public IQuantityMeasurementService GetService()
-        {
-            return new QuantityMeasurementServiceImpl(GetRepository());
-        }
-    
     }
 }
