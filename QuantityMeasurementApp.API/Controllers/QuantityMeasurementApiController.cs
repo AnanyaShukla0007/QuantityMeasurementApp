@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Swashbuckle.AspNetCore.Annotations;
 
 using QuantityMeasurementApp.Business.Interface;
@@ -11,6 +12,7 @@ namespace QuantityMeasurementApp.API.Controllers
     [ApiController]
     [Route("api/v1/quantities")]
     [Tags("Quantity Measurements")]
+    [Authorize(Roles = "Admin")]
     public class QuantityMeasurementApiController : ControllerBase
     {
         private readonly IQuantityMeasurementService _service;
@@ -109,7 +111,7 @@ namespace QuantityMeasurementApp.API.Controllers
         [ProducesResponseType(typeof(List<QuantityMeasurementEntity>), 200)]
         public async Task<ActionResult<List<QuantityMeasurementEntity>>> GetErroredHistory()
         {
-            const string cacheKey = "errored_operations";
+            const string cacheKey = "errored_history";
 
             var cached = await _cache.GetAsync<List<QuantityMeasurementEntity>>(cacheKey);
 
@@ -145,4 +147,4 @@ namespace QuantityMeasurementApp.API.Controllers
             return Ok(count);
         }
     }
-}  
+}
