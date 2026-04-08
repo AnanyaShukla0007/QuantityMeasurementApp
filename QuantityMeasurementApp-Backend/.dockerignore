@@ -1,7 +1,0 @@
-**/.git
-**/.gitignore
-**/bin
-**/obj
-**/*.user
-**/*.suo
-.vs
