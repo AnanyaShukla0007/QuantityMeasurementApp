@@ -7,10 +7,8 @@ namespace QuantityMeasurementApp.Model.Entities
         [Key]
         public int Id { get; set; }
 
-        [Required]
         public string Username { get; set; } = string.Empty;
 
-        // 🔴 MUST BE NULLABLE FOR GOOGLE LOGIN
         public string? PasswordHash { get; set; }
 
         public string? Salt { get; set; }

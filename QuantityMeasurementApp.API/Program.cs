@@ -1,7 +1,4 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authentication.Cookies; // ✅ ADDED
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -14,17 +11,19 @@ using QuantityMeasurementApp.Business.Services;
 using QuantityMeasurementApp.Repository.Interface;
 using QuantityMeasurementApp.Repository.Services;
 using QuantityMeasurementApp.API.Services;
+using QuantityMeasurementApp.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ── CORS (FIXED) ─────────────────────────────────────
+// ── CORS ─────────────────────────────────────────────
+var frontendUrl = builder.Configuration["FrontendUrl"] ?? "http://localhost:4200";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Angular", policy =>
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins(frontendUrl)
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials()); // ✅ REQUIRED
+              .AllowCredentials());
 });
 
 // ── Controllers ──────────────────────────────────────
@@ -41,12 +40,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.EnableAnnotations();
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "Quantity Measurements",
-        Version = "v1"
-    });
-
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Quantity Measurements", Version = "v1" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -55,30 +49,33 @@ builder.Services.AddSwaggerGen(c =>
         BearerFormat = "JWT",
         In = ParameterLocation.Header
     });
-
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
             {
-                Reference = new OpenApiReference
-                {
-                    Id = "Bearer",
-                    Type = ReferenceType.SecurityScheme
-                }
+                Reference = new OpenApiReference { Id = "Bearer", Type = ReferenceType.SecurityScheme }
             },
             new string[] {}
         }
     });
 });
 
-// ── Database ─────────────────────────────────────────
+// ── Database (PostgreSQL) ─────────────────────────────
 builder.Services.AddDbContext<QuantityDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ── Redis ────────────────────────────────────────────
-builder.Services.AddStackExchangeRedisCache(options =>
-    options.Configuration = builder.Configuration["Redis:ConnectionString"]);
+// ── Redis (optional - falls back to in-memory) ────────
+var redisConn = builder.Configuration["Redis:ConnectionString"];
+if (!string.IsNullOrEmpty(redisConn))
+{
+    builder.Services.AddStackExchangeRedisCache(options =>
+        options.Configuration = redisConn);
+}
+else
+{
+    builder.Services.AddDistributedMemoryCache();
+}
 
 // ── Services ─────────────────────────────────────────
 builder.Services.AddScoped<UserRepository>();
@@ -98,17 +95,12 @@ if (string.IsNullOrEmpty(jwtKey) || Encoding.UTF8.GetBytes(jwtKey).Length < 32)
 
 builder.Services.AddSingleton(new JwtService(jwtKey, issuer!, audience!));
 
-// ── Authentication (FIXED) ───────────────────────────
+// ── Authentication (JWT only) ────────────────────────
 builder.Services.AddAuthentication(options =>
 {
-    // JWT for APIs
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-
-    // 🔴 REQUIRED FOR GOOGLE FLOW
-    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddCookie() // ✅ REQUIRED
 .AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -121,18 +113,19 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = audience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
-})
-.AddGoogle(options =>
-{
-    options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-    options.CallbackPath = "/signin-google";
 });
 
 // ─────────────────────────────────────────────────────
 var app = builder.Build();
 
-app.UseHttpsRedirection();
+// ── Auto-migrate on startup ───────────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<QuantityDbContext>();
+    db.Database.Migrate();
+}
+
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
@@ -142,10 +135,7 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseCors("Angular");
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
