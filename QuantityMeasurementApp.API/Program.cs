@@ -200,7 +200,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.EnableAnnotations();
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Quantity Measurements", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Quantity Measurements",
+        Version = "v1"
+    });
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -287,15 +291,13 @@ builder.Services.AddAuthentication(options =>
 // ─────────────────────────────────────────────────────
 var app = builder.Build();
 
-// ── Migration ────────────────────────────────────────
+// ── Create DB Tables If Missing ──────────────────────
 using (var scope = app.Services.CreateScope())
 {
     try
     {
         var db = scope.ServiceProvider.GetRequiredService<QuantityDbContext>();
-
-        db.Database.ExecuteSqlRaw(@"DROP TABLE IF EXISTS ""Measurements"";");
-        db.Database.Migrate();
+        db.Database.EnsureCreated();
     }
     catch (Exception ex)
     {
