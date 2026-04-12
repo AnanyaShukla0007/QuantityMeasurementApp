@@ -21,8 +21,9 @@ namespace QuantityMeasurementApp.Repository.Services
                 _context.Measurements.Add(entity);
                 _context.SaveChanges();
             }
-            catch
+            catch (Exception ex)
             {
+                throw new Exception(ex.InnerException?.Message ?? ex.Message);
             }
         }
 
