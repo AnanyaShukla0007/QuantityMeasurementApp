@@ -6,15 +6,15 @@ namespace QuantityMeasurementApp.Business.Interface
 {
     public interface IQuantityMeasurementService
     {
-        QuantityResponse CompareQuantities(BinaryQuantityRequest request);
+        QuantityResponse CompareQuantities(BinaryQuantityRequest request, string username);
 
-        QuantityResponse ConvertQuantity(ConversionRequest request);
+        QuantityResponse ConvertQuantity(ConversionRequest request, string username);
 
-        QuantityResponse AddQuantities(BinaryQuantityRequest request);
+        QuantityResponse AddQuantities(BinaryQuantityRequest request, string username);
 
-        QuantityResponse SubtractQuantities(BinaryQuantityRequest request);
+        QuantityResponse SubtractQuantities(BinaryQuantityRequest request, string username);
 
-        DivisionResponse DivideQuantities(BinaryQuantityRequest request);
+        DivisionResponse DivideQuantities(BinaryQuantityRequest request, string username);
 
         List<QuantityMeasurementEntity> GetAllHistory();
 

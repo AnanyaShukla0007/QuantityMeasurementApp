@@ -19,27 +19,16 @@ namespace QuantityMeasurementApp.Business.Services
             _repository = repository;
         }
 
-        public QuantityResponse ConvertQuantity(ConversionRequest request)
+        public QuantityResponse ConvertQuantity(ConversionRequest request, string username)
         {
             RequestValidator.ValidateConversion(request);
 
             double baseVal = ToBase(request.Source);
             double result = FromBase(baseVal, request.TargetUnit, request.Source.Category);
 
-            _repository.Save(new QuantityMeasurementEntity
-            {
-                Username = "Guest",
-                OperationType = OperationType.CONVERT,
-                MeasurementCategory = request.Source.Category,
-                Operand1Value = request.Source.Value,
-                Operand1Unit = request.Source.Unit,
-                Operand2Value = 0,
-                Operand2Unit = "",
-                ResultValue = result,
-                ResultUnit = request.TargetUnit,
-                ErrorMessage = null,
-                Timestamp = DateTime.UtcNow
-            });
+            SaveHistory(username, OperationType.CONVERT, request.Source.Category,
+                request.Source.Value, request.Source.Unit,
+                0, "", result, request.TargetUnit);
 
             return new QuantityResponse
             {
@@ -49,7 +38,7 @@ namespace QuantityMeasurementApp.Business.Services
             };
         }
 
-        public QuantityResponse AddQuantities(BinaryQuantityRequest request)
+        public QuantityResponse AddQuantities(BinaryQuantityRequest request, string username)
         {
             RequestValidator.ValidateBinary(request);
 
@@ -60,20 +49,10 @@ namespace QuantityMeasurementApp.Business.Services
             string unit = request.TargetUnit ?? request.Quantity1.Unit;
             double result = FromBase(resultBase, unit, request.Quantity1.Category);
 
-            _repository.Save(new QuantityMeasurementEntity
-            {
-                Username = "Guest",
-                OperationType = OperationType.ADD,
-                MeasurementCategory = request.Quantity1.Category,
-                Operand1Value = request.Quantity1.Value,
-                Operand1Unit = request.Quantity1.Unit,
-                Operand2Value = request.Quantity2.Value,
-                Operand2Unit = request.Quantity2.Unit,
-                ResultValue = result,
-                ResultUnit = unit,
-                ErrorMessage = null,
-                Timestamp = DateTime.UtcNow
-            });
+            SaveHistory(username, OperationType.ADD, request.Quantity1.Category,
+                request.Quantity1.Value, request.Quantity1.Unit,
+                request.Quantity2.Value, request.Quantity2.Unit,
+                result, unit);
 
             return new QuantityResponse
             {
@@ -83,7 +62,7 @@ namespace QuantityMeasurementApp.Business.Services
             };
         }
 
-        public QuantityResponse SubtractQuantities(BinaryQuantityRequest request)
+        public QuantityResponse SubtractQuantities(BinaryQuantityRequest request, string username)
         {
             RequestValidator.ValidateBinary(request);
 
@@ -94,20 +73,10 @@ namespace QuantityMeasurementApp.Business.Services
             string unit = request.TargetUnit ?? request.Quantity1.Unit;
             double result = FromBase(resultBase, unit, request.Quantity1.Category);
 
-            _repository.Save(new QuantityMeasurementEntity
-            {
-                Username = "Guest",
-                OperationType = OperationType.SUBTRACT,
-                MeasurementCategory = request.Quantity1.Category,
-                Operand1Value = request.Quantity1.Value,
-                Operand1Unit = request.Quantity1.Unit,
-                Operand2Value = request.Quantity2.Value,
-                Operand2Unit = request.Quantity2.Unit,
-                ResultValue = result,
-                ResultUnit = unit,
-                ErrorMessage = null,
-                Timestamp = DateTime.UtcNow
-            });
+            SaveHistory(username, OperationType.SUBTRACT, request.Quantity1.Category,
+                request.Quantity1.Value, request.Quantity1.Unit,
+                request.Quantity2.Value, request.Quantity2.Unit,
+                result, unit);
 
             return new QuantityResponse
             {
@@ -117,7 +86,7 @@ namespace QuantityMeasurementApp.Business.Services
             };
         }
 
-        public QuantityResponse CompareQuantities(BinaryQuantityRequest request)
+        public QuantityResponse CompareQuantities(BinaryQuantityRequest request, string username)
         {
             RequestValidator.ValidateBinary(request);
 
@@ -126,20 +95,11 @@ namespace QuantityMeasurementApp.Business.Services
 
             bool equal = Math.Abs(base1 - base2) < 0.0001;
 
-            _repository.Save(new QuantityMeasurementEntity
-            {
-                Username = "Guest",
-                OperationType = OperationType.COMPARE,
-                MeasurementCategory = request.Quantity1.Category,
-                Operand1Value = request.Quantity1.Value,
-                Operand1Unit = request.Quantity1.Unit,
-                Operand2Value = request.Quantity2.Value,
-                Operand2Unit = request.Quantity2.Unit,
-                ResultValue = equal ? 1 : 0,
-                ResultUnit = equal ? "Equal" : "Not Equal",
-                ErrorMessage = null,
-                Timestamp = DateTime.UtcNow
-            });
+            SaveHistory(username, OperationType.COMPARE, request.Quantity1.Category,
+                request.Quantity1.Value, request.Quantity1.Unit,
+                request.Quantity2.Value, request.Quantity2.Unit,
+                equal ? 1 : 0,
+                equal ? "Equal" : "Not Equal");
 
             return new QuantityResponse
             {
@@ -149,7 +109,7 @@ namespace QuantityMeasurementApp.Business.Services
             };
         }
 
-        public DivisionResponse DivideQuantities(BinaryQuantityRequest request)
+        public DivisionResponse DivideQuantities(BinaryQuantityRequest request, string username)
         {
             RequestValidator.ValidateBinary(request);
 
@@ -161,20 +121,10 @@ namespace QuantityMeasurementApp.Business.Services
 
             double ratio = base1 / base2;
 
-            _repository.Save(new QuantityMeasurementEntity
-            {
-                Username = "Guest",
-                OperationType = OperationType.DIVIDE,
-                MeasurementCategory = request.Quantity1.Category,
-                Operand1Value = request.Quantity1.Value,
-                Operand1Unit = request.Quantity1.Unit,
-                Operand2Value = request.Quantity2.Value,
-                Operand2Unit = request.Quantity2.Unit,
-                ResultValue = ratio,
-                ResultUnit = "Ratio",
-                ErrorMessage = null,
-                Timestamp = DateTime.UtcNow
-            });
+            SaveHistory(username, OperationType.DIVIDE, request.Quantity1.Category,
+                request.Quantity1.Value, request.Quantity1.Unit,
+                request.Quantity2.Value, request.Quantity2.Unit,
+                ratio, "Ratio");
 
             return new DivisionResponse
             {
@@ -182,6 +132,33 @@ namespace QuantityMeasurementApp.Business.Services
                 Ratio = ratio,
                 Interpretation = $"Ratio = {ratio:F2}"
             };
+        }
+
+        private void SaveHistory(
+            string username,
+            OperationType operation,
+            MeasurementCategory category,
+            double operand1Value,
+            string operand1Unit,
+            double operand2Value,
+            string operand2Unit,
+            double resultValue,
+            string resultUnit)
+        {
+            _repository.Save(new QuantityMeasurementEntity
+            {
+                Username = username,
+                OperationType = operation,
+                MeasurementCategory = category,
+                Operand1Value = operand1Value,
+                Operand1Unit = operand1Unit,
+                Operand2Value = operand2Value,
+                Operand2Unit = operand2Unit,
+                ResultValue = resultValue,
+                ResultUnit = resultUnit,
+                ErrorMessage = null,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         public List<QuantityMeasurementEntity> GetAllHistory()
