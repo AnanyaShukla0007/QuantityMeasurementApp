@@ -28,7 +28,7 @@ namespace QuantityMeasurementApp.API.Controllers
             _service = service;
             _cache = cache;
         }
-
+        [AllowAnonymous]
         [HttpPost("compare")]
         public ActionResult<QuantityResponse> Compare([FromBody] BinaryQuantityRequest request)
         {
@@ -41,7 +41,7 @@ namespace QuantityMeasurementApp.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
+        [AllowAnonymous]
         [HttpPost("convert")]
         public ActionResult<QuantityResponse> Convert([FromBody] ConversionRequest request)
         {
@@ -54,7 +54,7 @@ namespace QuantityMeasurementApp.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
+        [AllowAnonymous]
         [HttpPost("add")]
         public ActionResult<QuantityResponse> Add([FromBody] BinaryQuantityRequest request)
         {
@@ -67,7 +67,7 @@ namespace QuantityMeasurementApp.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
+        [AllowAnonymous]
         [HttpPost("subtract")]
         public ActionResult<QuantityResponse> Subtract([FromBody] BinaryQuantityRequest request)
         {
@@ -80,7 +80,7 @@ namespace QuantityMeasurementApp.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
+        [AllowAnonymous]
         [HttpPost("divide")]
         public ActionResult<DivisionResponse> Divide([FromBody] BinaryQuantityRequest request)
         {
