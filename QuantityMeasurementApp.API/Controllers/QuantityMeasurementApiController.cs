@@ -1,4 +1,8 @@
+// QuantityMeasurementApiController.cs
+
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using Swashbuckle.AspNetCore.Annotations;
 
 using QuantityMeasurementApp.Business.Interface;
@@ -10,6 +14,7 @@ namespace QuantityMeasurementApp.API.Controllers
 {
     [ApiController]
     [Route("api/v1/quantities")]
+    [Authorize]
     [Tags("Quantity Measurements")]
     public class QuantityMeasurementApiController : ControllerBase
     {
@@ -23,10 +28,6 @@ namespace QuantityMeasurementApp.API.Controllers
             _service = service;
             _cache = cache;
         }
-
-        // ─────────────────────────────────────────────
-        // CORE OPERATIONS
-        // ─────────────────────────────────────────────
 
         [HttpPost("compare")]
         public ActionResult<QuantityResponse> Compare([FromBody] BinaryQuantityRequest request)
@@ -93,21 +94,25 @@ namespace QuantityMeasurementApp.API.Controllers
             }
         }
 
-        // ─────────────────────────────────────────────
-        // HISTORY APIs (RESTORED)
-        // ─────────────────────────────────────────────
-
         [HttpGet("history")]
         public async Task<ActionResult<List<QuantityMeasurementEntity>>> GetHistory()
         {
-            const string cacheKey = "quantity_history";
+            var username = User.FindFirst(ClaimTypes.Name)?.Value
+                           ?? User.Identity?.Name;
+
+            if (string.IsNullOrWhiteSpace(username))
+                return Unauthorized();
+
+            var cacheKey = $"history_{username}";
 
             var cached = await _cache.GetAsync<List<QuantityMeasurementEntity>>(cacheKey);
 
             if (cached != null)
                 return Ok(cached);
 
-            var data = _service.GetAllHistory();
+            var data = _service.GetAllHistory()
+                .Where(x => x.Username == username)
+                .ToList();
 
             await _cache.SetAsync(cacheKey, data);
 
@@ -117,14 +122,22 @@ namespace QuantityMeasurementApp.API.Controllers
         [HttpGet("history/errored")]
         public async Task<ActionResult<List<QuantityMeasurementEntity>>> GetErroredHistory()
         {
-            const string cacheKey = "errored_history";
+            var username = User.FindFirst(ClaimTypes.Name)?.Value
+                           ?? User.Identity?.Name;
+
+            if (string.IsNullOrWhiteSpace(username))
+                return Unauthorized();
+
+            var cacheKey = $"errored_{username}";
 
             var cached = await _cache.GetAsync<List<QuantityMeasurementEntity>>(cacheKey);
 
             if (cached != null)
                 return Ok(cached);
 
-            var data = _service.GetErroredHistory();
+            var data = _service.GetErroredHistory()
+                .Where(x => x.Username == username)
+                .ToList();
 
             await _cache.SetAsync(cacheKey, data);
 
@@ -134,14 +147,21 @@ namespace QuantityMeasurementApp.API.Controllers
         [HttpGet("count")]
         public async Task<ActionResult<int>> GetTotalOperations()
         {
-            const string cacheKey = "operation_count";
+            var username = User.FindFirst(ClaimTypes.Name)?.Value
+                           ?? User.Identity?.Name;
+
+            if (string.IsNullOrWhiteSpace(username))
+                return Unauthorized();
+
+            var cacheKey = $"count_{username}";
 
             var cached = await _cache.GetAsync<int?>(cacheKey);
 
             if (cached != null)
-                return Ok(cached);
+                return Ok(cached.Value);
 
-            var count = _service.GetTotalOperations();
+            var count = _service.GetAllHistory()
+                .Count(x => x.Username == username);
 
             await _cache.SetAsync(cacheKey, count);
 

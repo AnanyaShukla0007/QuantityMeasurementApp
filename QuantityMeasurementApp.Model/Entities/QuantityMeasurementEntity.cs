@@ -1,3 +1,5 @@
+// QuantityMeasurementEntity.cs
+
 using System;
 using System.ComponentModel.DataAnnotations;
 using QuantityMeasurementApp.Model.Enums;
@@ -8,6 +10,8 @@ namespace QuantityMeasurementApp.Model.Entities
     {
         [Key]
         public int Id { get; set; }
+
+        public string Username { get; set; } = string.Empty;
 
         public OperationType OperationType { get; set; }
 

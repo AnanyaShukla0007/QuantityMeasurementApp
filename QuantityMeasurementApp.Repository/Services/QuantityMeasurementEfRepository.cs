@@ -1,3 +1,6 @@
+// QuantityMeasurementEfRepository.cs
+
+using System.Linq;
 using QuantityMeasurementApp.Repository.Interface;
 using QuantityMeasurementApp.Model.Entities;
 using QuantityMeasurementApp.Repository.Data;
@@ -22,6 +25,14 @@ namespace QuantityMeasurementApp.Repository.Services
         public List<QuantityMeasurementEntity> GetAll()
         {
             return _context.Measurements
+                .OrderByDescending(x => x.Timestamp)
+                .ToList();
+        }
+
+        public List<QuantityMeasurementEntity> GetByUsername(string username)
+        {
+            return _context.Measurements
+                .Where(x => x.Username == username)
                 .OrderByDescending(x => x.Timestamp)
                 .ToList();
         }
