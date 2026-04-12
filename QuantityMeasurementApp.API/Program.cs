@@ -20,10 +20,13 @@ var frontendUrl = builder.Configuration["FrontendUrl"] ?? "http://localhost:4200
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Angular", policy =>
-        policy.WithOrigins(frontendUrl)
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials());
+        policy.WithOrigins(
+            "http://localhost:4200",
+            "https://quantitymeasurementapp-lhbs.onrender.com"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials());
 });
 
 // ── Controllers ──────────────────────────────────────
@@ -119,10 +122,22 @@ builder.Services.AddAuthentication(options =>
 var app = builder.Build();
 
 // ── Auto-migrate on startup ───────────────────────────
+// using (var scope = app.Services.CreateScope())
+// {
+//     var db = scope.ServiceProvider.GetRequiredService<QuantityDbContext>();
+//     db.Database.Migrate();
+// }
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<QuantityDbContext>();
-    db.Database.Migrate();
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<QuantityDbContext>();
+        db.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Database migration skipped: {ex.Message}");
+    }
 }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
