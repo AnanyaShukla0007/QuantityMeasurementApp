@@ -293,11 +293,17 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var db = scope.ServiceProvider.GetRequiredService<QuantityDbContext>();
+
         db.Database.Migrate();
+
+        db.Database.ExecuteSqlRaw(@"
+            ALTER TABLE ""Measurements""
+            ADD COLUMN IF NOT EXISTS ""Username"" text NOT NULL DEFAULT 'Guest';
+        ");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Database migration skipped: {ex.Message}");
+        Console.WriteLine($"Startup DB sync skipped: {ex.Message}");
     }
 }
 
