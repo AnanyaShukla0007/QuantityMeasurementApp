@@ -1,16 +1,56 @@
-using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using QuantityMeasurementApp.Repository.Interface;
 using QuantityMeasurementApp.Model.Entities;
+using QuantityMeasurementApp.Repository.Data;
 
-namespace QuantityMeasurementApp.Repository.Data
+namespace QuantityMeasurementApp.Repository.Services
 {
-    public class QuantityDbContext : DbContext
+    public class QuantityMeasurementEfRepository : IQuantityMeasurementRepository
     {
-        public QuantityDbContext(DbContextOptions<QuantityDbContext> options)
-            : base(options)
+        private readonly QuantityDbContext _context;
+
+        public QuantityMeasurementEfRepository(QuantityDbContext context)
         {
+            _context = context;
         }
 
-        public DbSet<QuantityMeasurementEntity> Measurements { get; set; }
-        public DbSet<UserEntity> Users { get; set; }
+        public void Save(QuantityMeasurementEntity entity)
+        {
+            try
+            {
+                _context.Measurements.Add(entity);
+                _context.SaveChanges();
+            }
+            catch
+            {
+                // Temporarily ignore DB history save failures
+            }
+        }
+
+        public List<QuantityMeasurementEntity> GetAll()
+        {
+            return _context.Measurements
+                .OrderByDescending(x => x.Timestamp)
+                .ToList();
+        }
+
+        public List<QuantityMeasurementEntity> GetByUsername(string username)
+        {
+            return _context.Measurements
+                .Where(x => x.Username == username)
+                .OrderByDescending(x => x.Timestamp)
+                .ToList();
+        }
+
+        public void Clear()
+        {
+            _context.Measurements.RemoveRange(_context.Measurements);
+            _context.SaveChanges();
+        }
+
+        public int GetTotalCount()
+        {
+            return _context.Measurements.Count();
+        }
     }
 }
