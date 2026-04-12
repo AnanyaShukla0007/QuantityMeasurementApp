@@ -1,56 +1,16 @@
-using System.Linq;
-using QuantityMeasurementApp.Repository.Interface;
+using Microsoft.EntityFrameworkCore;
 using QuantityMeasurementApp.Model.Entities;
-using QuantityMeasurementApp.Repository.Data;
 
-namespace QuantityMeasurementApp.Repository.Services
+namespace QuantityMeasurementApp.Repository.Data
 {
-    public class QuantityMeasurementEfRepository : IQuantityMeasurementRepository
+    public class QuantityDbContext : DbContext
     {
-        private readonly QuantityDbContext _context;
-
-        public QuantityMeasurementEfRepository(QuantityDbContext context)
+        public QuantityDbContext(DbContextOptions<QuantityDbContext> options)
+            : base(options)
         {
-            _context = context;
         }
 
-        public void Save(QuantityMeasurementEntity entity)
-        {
-            try
-            {
-                _context.Measurements.Add(entity);
-                _context.SaveChanges();
-            }
-            catch
-            {
-                // Temporarily ignore DB history save failures
-            }
-        }
-
-        public List<QuantityMeasurementEntity> GetAll()
-        {
-            return _context.Measurements
-                .OrderByDescending(x => x.Timestamp)
-                .ToList();
-        }
-
-        public List<QuantityMeasurementEntity> GetByUsername(string username)
-        {
-            return _context.Measurements
-                .Where(x => x.Username == username)
-                .OrderByDescending(x => x.Timestamp)
-                .ToList();
-        }
-
-        public void Clear()
-        {
-            _context.Measurements.RemoveRange(_context.Measurements);
-            _context.SaveChanges();
-        }
-
-        public int GetTotalCount()
-        {
-            return _context.Measurements.Count();
-        }
+        public DbSet<QuantityMeasurementEntity> Measurements { get; set; }
+        public DbSet<UserEntity> Users { get; set; }
     }
 }

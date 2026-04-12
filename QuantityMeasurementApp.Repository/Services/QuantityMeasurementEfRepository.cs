@@ -1,5 +1,3 @@
-// QuantityMeasurementEfRepository.cs
-
 using System.Linq;
 using QuantityMeasurementApp.Repository.Interface;
 using QuantityMeasurementApp.Model.Entities;
@@ -18,8 +16,14 @@ namespace QuantityMeasurementApp.Repository.Services
 
         public void Save(QuantityMeasurementEntity entity)
         {
-            _context.Measurements.Add(entity);
-            _context.SaveChanges();
+            try
+            {
+                _context.Measurements.Add(entity);
+                _context.SaveChanges();
+            }
+            catch
+            {
+            }
         }
 
         public List<QuantityMeasurementEntity> GetAll()
