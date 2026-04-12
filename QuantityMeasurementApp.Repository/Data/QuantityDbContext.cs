@@ -12,5 +12,16 @@ namespace QuantityMeasurementApp.Repository.Data
 
         public DbSet<QuantityMeasurementEntity> Measurements { get; set; }
         public DbSet<UserEntity> Users { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<QuantityMeasurementEntity>()
+                .ToTable("Measurements");
+
+            modelBuilder.Entity<UserEntity>()
+                .ToTable("Users");
+        }
     }
 }
