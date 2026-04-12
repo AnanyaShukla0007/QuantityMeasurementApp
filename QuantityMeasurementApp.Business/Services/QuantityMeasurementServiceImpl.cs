@@ -28,6 +28,7 @@ namespace QuantityMeasurementApp.Business.Services
 
             _repository.Save(new QuantityMeasurementEntity
             {
+                Username = "Guest",
                 OperationType = OperationType.CONVERT,
                 MeasurementCategory = request.Source.Category,
                 Operand1Value = request.Source.Value,
@@ -61,6 +62,7 @@ namespace QuantityMeasurementApp.Business.Services
 
             _repository.Save(new QuantityMeasurementEntity
             {
+                Username = "Guest",
                 OperationType = OperationType.ADD,
                 MeasurementCategory = request.Quantity1.Category,
                 Operand1Value = request.Quantity1.Value,
@@ -94,6 +96,7 @@ namespace QuantityMeasurementApp.Business.Services
 
             _repository.Save(new QuantityMeasurementEntity
             {
+                Username = "Guest",
                 OperationType = OperationType.SUBTRACT,
                 MeasurementCategory = request.Quantity1.Category,
                 Operand1Value = request.Quantity1.Value,
@@ -125,6 +128,7 @@ namespace QuantityMeasurementApp.Business.Services
 
             _repository.Save(new QuantityMeasurementEntity
             {
+                Username = "Guest",
                 OperationType = OperationType.COMPARE,
                 MeasurementCategory = request.Quantity1.Category,
                 Operand1Value = request.Quantity1.Value,
@@ -159,6 +163,7 @@ namespace QuantityMeasurementApp.Business.Services
 
             _repository.Save(new QuantityMeasurementEntity
             {
+                Username = "Guest",
                 OperationType = OperationType.DIVIDE,
                 MeasurementCategory = request.Quantity1.Category,
                 Operand1Value = request.Quantity1.Value,
