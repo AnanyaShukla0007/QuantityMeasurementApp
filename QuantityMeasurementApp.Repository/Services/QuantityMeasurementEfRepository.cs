@@ -28,28 +28,55 @@ namespace QuantityMeasurementApp.Repository.Services
 
         public List<QuantityMeasurementEntity> GetAll()
         {
-            return _context.Measurements
-                .OrderByDescending(x => x.Timestamp)
-                .ToList();
+            try
+            {
+                return _context.Measurements
+                    .OrderByDescending(x => x.Timestamp)
+                    .ToList();
+            }
+            catch
+            {
+                return new List<QuantityMeasurementEntity>();
+            }
         }
 
         public List<QuantityMeasurementEntity> GetByUsername(string username)
         {
-            return _context.Measurements
-                .Where(x => x.Username == username)
-                .OrderByDescending(x => x.Timestamp)
-                .ToList();
+            try
+            {
+                return _context.Measurements
+                    .Where(x => x.Username == username)
+                    .OrderByDescending(x => x.Timestamp)
+                    .ToList();
+            }
+            catch
+            {
+                return new List<QuantityMeasurementEntity>();
+            }
         }
 
         public void Clear()
         {
-            _context.Measurements.RemoveRange(_context.Measurements);
-            _context.SaveChanges();
+            try
+            {
+                _context.Measurements.RemoveRange(_context.Measurements);
+                _context.SaveChanges();
+            }
+            catch
+            {
+            }
         }
 
         public int GetTotalCount()
         {
-            return _context.Measurements.Count();
+            try
+            {
+                return _context.Measurements.Count();
+            }
+            catch
+            {
+                return 0;
+            }
         }
     }
 }
