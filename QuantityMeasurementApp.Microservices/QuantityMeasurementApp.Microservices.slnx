@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/AuthService/">
+    <Project Path="AuthService/AuthService.API/AuthService.API.csproj" />
+    <Project Path="AuthService/AuthService.Business/AuthService.Business.csproj" />
+    <Project Path="AuthService/AuthService.Model/AuthService.Model.csproj" />
+    <Project Path="AuthService/AuthService.Repository/AuthService.Repository.csproj" />
+  </Folder>
+  <Folder Name="/QMAService/">
+    <Project Path="QMAService/QMAService.API/QMAService.API.csproj" />
+    <Project Path="QMAService/QMAService.Business/QMAService.Business.csproj" />
+    <Project Path="QMAService/QMAService.Model/QMAService.Model.csproj" />
+    <Project Path="QMAService/QMAService.Repository/QMAService.Repository.csproj" />
+  </Folder>
+  <Project Path="ApiGateway/ApiGateway.csproj" />
+  <Project Path="Shared.Common/Shared.Common.csproj" />
+</Solution>
